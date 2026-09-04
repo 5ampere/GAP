@@ -1,0 +1,144 @@
+/* ==========================================================================
+   GAP 落地页样式：Hero / 剪影 / 粒子 / 能力地图 / 流程
+   ========================================================================== */
+
+/* ---- Hero ---- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 92vh;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-image: url(/hero-bg.webp);
+  background-size: cover;
+  background-position: center;
+}
+/* 暗色蒙层 */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.22));
+  z-index: 1;
+}
+.hero-inner { position: relative; z-index: 3; }
+.hero-title {
+  font-size: clamp(1.6rem, 6vw, 6rem);
+  margin-bottom: var(--space-6);
+  color: #fff;
+  white-space: nowrap;
+}
+.hero-eyebrow { color: rgba(255, 255, 255, 0.72); white-space: nowrap; }
+.gap-accent { color: #FF3B30; }
+.hero-sub {
+  font-size: clamp(0.9rem, 1.8vw, 1.4rem);
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 auto var(--space-8);
+  white-space: nowrap;
+}
+.hero-cta { display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap; }
+.hero-scroll-hint {
+  position: absolute; bottom: var(--space-8); left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.6); font-size: 13px;
+  z-index: 3;
+  animation: bob 2s ease-in-out infinite;
+}
+
+/* 背景层：剪影 + 粒子 + 雷达 */
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.hero-silhouettes { position: absolute; inset: 0; opacity: 0.14; }
+.hero-silhouettes svg { position: absolute; color: var(--text-primary); }
+.silhouette-1 { left: 4%; bottom: 8%; width: 220px; }
+.silhouette-2 { right: 5%; bottom: 6%; width: 260px; }
+.silhouette-3 { left: 30%; top: 12%; width: 140px; opacity: 0.5; }
+
+.hero-particles { position: absolute; inset: 0; }
+.particle {
+  position: absolute; border-radius: 50%;
+  background: var(--fill);
+}
+.particle--accent { background: var(--accent-faint); }
+
+/* 能力雷达（Hero 用） */
+
+/* ---- 对比两栏（是什么 / 不是什么） ---- */
+.compare-list { list-style: none; padding: 0; margin: var(--space-6) 0 0; }
+.compare-list li {
+  display: flex; gap: var(--space-3); align-items: flex-start;
+  padding: var(--space-3) 0; border-bottom: 1px solid var(--separator);
+}
+.compare-list li:last-child { border-bottom: none; }
+.compare-list .mark { flex: 0 0 auto; width: 22px; height: 22px; }
+.compare-list .mark.yes { color: var(--success); }
+.compare-list .mark.no { color: var(--danger); }
+
+/* ---- 能力地图区块 ---- */
+.ability-map-wrap { position: relative; max-width: 640px; margin: 0 auto; }
+.ability-detail {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  min-height: 140px;
+  margin-top: var(--space-6);
+  transition: background var(--dur-base);
+}
+.ability-detail .ability-name { display: flex; align-items: center; gap: var(--space-3); }
+.category-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+
+/* ---- 流程时间轴 ---- */
+.steps { display: flex; flex-wrap: wrap; gap: var(--space-6); justify-content: center; }
+.step {
+  flex: 1; min-width: 150px; max-width: 200px;
+  text-align: center; position: relative;
+}
+.step .step-icon {
+  width: 56px; height: 56px; margin: 0 auto var(--space-3);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-elevated); color: var(--accent);
+  font-size: 20px; font-weight: 600;
+}
+.step .step-title { font-weight: 600; margin-bottom: 4px; }
+.step .step-desc { font-size: 13px; color: var(--text-secondary); }
+
+/* ---- 多运动共享演示 ---- */
+.sport-chips { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; margin: var(--space-6) 0; }
+.shared-hint {
+  min-height: 120px; background: var(--bg-elevated);
+  border-radius: var(--radius-lg); padding: var(--space-6);
+  display: flex; flex-direction: column; gap: var(--space-4);
+}
+
+/* ---- 动画 ---- */
+@keyframes bob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, 8px); }
+}
+@keyframes drift {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(8px, -12px); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (max-width: 768px) {
+  .hero { min-height: 80vh; }
+  .hero-title { font-size: clamp(1.3rem, 8.5vw, 2.5rem); }
+  .hero-sub { font-size: 0.72rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-hint { animation: none; }
+}
+
+/* ---- 3 层能力树 ---- */
+.ability-tree { display: flex; flex-direction: column; gap: var(--space-6); }
+.ability-layer-head { display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-4); }
+.ability-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-5); }
+.ability-cell { padding: 4px 0; }
+.ability-cell strong { font-size: 15px; }
+.ability-cell p { margin-top: 4px; }
+
+/* ---- 共享能力雷达图 ---- */
+.shared-radar-wrap { max-width: 640px; margin: var(--space-8) auto 0; }

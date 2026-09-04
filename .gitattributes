@@ -1,0 +1,11 @@
+# 统一换行与二进制声明（消除 CRLF 告警，保证跨平台一致）
+* text=auto
+
+# 图片/二进制：不参与换行转换
+*.png binary
+*.webp binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

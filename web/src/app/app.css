@@ -1,0 +1,248 @@
+/* ==========================================================================
+   GAP App 样式：向导 / 雷达图 / 能力条 / 周计划 / 仪表盘
+   ========================================================================== */
+
+/* ---- 向导 ---- */
+.wizard-shell { max-width: 760px; margin: 0 auto; padding: var(--space-10) 0; }
+.wizard-card { background: var(--bg-page); border-radius: var(--radius-lg); }
+.wizard-actions { display: flex; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-8); }
+.wizard-panel { display: none; }
+.wizard-panel.is-active { display: block; animation: fadeIn var(--dur-base) var(--ease-standard); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* 运动选择卡片 */
+.sport-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-4); }
+.sport-card {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  padding: var(--space-5); border: 1.5px solid var(--separator);
+  border-radius: var(--radius-md); background: var(--bg-page);
+  cursor: pointer; text-align: center; position: relative;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+.sport-card:hover { border-color: var(--text-tertiary); }
+.sport-card.is-selected { border-color: var(--accent); background: var(--accent-faint); }
+.sport-card svg { width: 34px; height: 34px; color: var(--text-primary); }
+.sport-card .sport-name { font-size: 14px; font-weight: 500; }
+.sport-card .sport-cat { font-size: 11px; color: var(--text-tertiary); }
+.sport-card .check {
+  position: absolute; top: 8px; right: 8px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--accent); color: #fff;
+  display: none; align-items: center; justify-content: center; font-size: 12px;
+}
+.sport-card.is-selected .check { display: flex; }
+
+/* SAQ 自评滑块 */
+.saq-list { display: flex; flex-direction: column; gap: var(--space-4); }
+.saq-item { padding: var(--space-6); background: var(--bg-elevated); border-radius: var(--radius-md); margin-bottom: var(--space-3); }
+.saq-item .saq-q { font-weight: 500; margin-bottom: var(--space-4); }
+.saq-item .saq-code { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+.saq-scale { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-2); }
+.saq-scale input[type="range"] { flex: 1; accent-color: var(--accent); }
+.saq-anchors { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-tertiary); margin-top: var(--space-2); }
+.saq-value { font-weight: 600; min-width: 24px; text-align: center; }
+
+/* ---- 仪表盘 ---- */
+.dash-sections { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+.dash-radar-wrap { max-width: 640px; margin: 0 auto; }
+.stat-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-4); }
+.stat-tile { background: var(--bg-elevated); border-radius: var(--radius-md); padding: var(--space-5); }
+.stat-tile .stat-value { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+.stat-tile .stat-label { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+/* 能力缺口：单张横向条形图（v1.17 三档色 + 行尾档位 chip） */
+.gap-bars { display: flex; flex-direction: column; gap: var(--space-3); }
+.gap-bar-row { display: grid; grid-template-columns: 170px 1fr 64px; align-items: center; gap: var(--space-3); }
+.gap-bar-name { font-size: 13px; font-weight: 500; line-height: 1.25; }
+.gap-bar-track { position: relative; height: 14px; background: var(--bg-elevated-2); border-radius: var(--radius-pill); overflow: hidden; }
+.gap-bar-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: var(--radius-pill); transition: width 0.6s var(--ease-standard); }
+.gap-bar-tier { text-align: right; }
+
+/* 缺口图图例（v1.17 三档色，颜色同 tier-chip） */
+.gap-legend { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-3); }
+.gap-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend-dot.is-high { background: var(--danger); }
+.legend-dot.is-mid { background: var(--warning); }
+.legend-dot.is-low { background: var(--success); }
+
+/* 卡片底栏：操作按钮靠右下角 */
+.dash-card-foot { display: flex; justify-content: flex-end; }
+
+/* 能力条 */
+.ability-bar { display: grid; grid-template-columns: 150px 1fr 70px; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }
+.ability-bar .bar-track { position: relative; height: 10px; background: var(--bg-elevated-2); border-radius: var(--radius-pill); }
+.ability-bar .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--radius-pill); transition: width 0.6s var(--ease-standard); }
+.ability-bar .bar-target { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text-secondary); border-radius: 2px; }
+.ability-bar .bar-val { font-family: var(--font-mono); font-size: 13px; text-align: right; }
+
+/* 雷达图容器 */
+.radar-svg { width: 100%; height: auto; }
+.radar-legend { display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap; margin-top: var(--space-3); }
+.radar-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.legend-line { width: 16px; height: 2px; border-radius: 2px; display: inline-block; }
+
+/* ---- 编排视图三大板块（v1.16） ---- */
+.plan-block { margin-top: var(--space-8); }
+.plan-block-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--space-3); flex-wrap: wrap;
+}
+.plan-block-title { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 0; line-height: 1.2; }
+.plan-block-meta { font-size: 13px; color: var(--text-secondary); }
+
+/* ---- 训练日切换条（Tabs） ---- */
+.day-tabs { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: 2px; }
+.day-tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--separator); background: var(--bg-page);
+  border-radius: var(--radius-pill); padding: 8px 16px; cursor: pointer;
+  font-size: 14px; color: var(--text-primary); white-space: nowrap;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+.day-tab:hover { border-color: var(--text-tertiary); }
+.day-tab.is-active { border-color: var(--accent); background: var(--accent-faint); }
+
+/* ---- 单日编排：仪表盘 ③ 日瓦片 ---- */
+.day-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--space-3); }
+.day-tile {
+  background: var(--bg-page); border: 1px solid var(--separator);
+  border-radius: var(--radius-md); padding: var(--space-4);
+}
+.day-tile-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.day-tile-label { font-weight: 600; }
+.day-tile-count {
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-pill);
+  background: var(--fill); color: var(--text-secondary); white-space: nowrap;
+}
+.day-tile-theme { font-size: 14px; color: var(--text-primary); margin-top: 8px; }
+.day-tile-meta { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+
+/* ---- 目标能力分组（AbilityGroup · v1.18 取代 AbilityCard） ----
+   每个目标能力 = 一个「能力组」：组头 = 名称 + 优先级档 chip（可点选中 → 联动动作库）；
+   组内直接列该能力已加入的动作（无「已选 n–m 组」统计）。通用动作（准备/收尾）组弱化。 */
+.ag-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.ag-group {
+  background: var(--bg-page); border: 1px solid var(--separator);
+  border-radius: var(--radius-md); overflow: hidden;
+  transition: border-color var(--dur-fast) var(--ease-standard);
+}
+.ag-group:hover { border-color: var(--text-tertiary); }
+.ag-group.is-active { border-color: var(--accent); }
+.ag-group.is-active > .ag-head { background: var(--accent-faint); }
+.ag-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-3); flex-wrap: wrap; width: 100%;
+  padding: 10px 14px; text-align: left;
+  font: inherit; color: inherit; background: none; border: none; cursor: pointer;
+}
+.ag-head.is-active .ag-name { color: var(--accent); }
+.ag-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ag-name { font-size: 14px; font-weight: 600; }
+.ag-body { border-top: 1px solid var(--separator); padding: 2px 14px 8px; }
+.ag-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 8px 0; }
+.ag-row + .ag-row { border-top: 1px dashed var(--separator); }
+.ag-main { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.ag-empty { padding: 8px 0 6px; font-size: 13px; color: var(--text-tertiary); }
+.ag-foot { border-top: 1px solid var(--separator); padding-top: var(--space-4); margin-top: var(--space-4); }
+/* 通用动作（准备/收尾）弱化组：灰、无档 chip、不可选中 */
+.ag-group.ag-generic {
+  background: color-mix(in srgb, var(--bg-elevated-2) 55%, var(--bg-page));
+}
+.ag-generic .ag-head { cursor: default; }
+.ag-generic .ag-name { color: var(--text-secondary); font-weight: 500; }
+
+/* ---- 优先级档 chip（三档色，v1.17；AbilityGroup / PlanTable / GapBarChart 行尾共用，见 6.4.5） ---- */
+.tier-chip {
+  display: inline-flex; align-items: center; white-space: nowrap;
+  font-size: 11px; font-weight: 600; line-height: 1; padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+.tier-chip.is-high { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+.tier-chip.is-mid { background: color-mix(in srgb, var(--warning) 16%, transparent); color: var(--warning); }
+.tier-chip.is-low { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
+
+/* ---- 动作选择矩阵（ExercisePicker · v1.16 卡片网格 3 列） ---- */
+.eq-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.eq-card {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  background: var(--bg-page); border: 1px solid var(--separator);
+  border-radius: var(--radius-md); padding: var(--space-4);
+}
+.eq-main { display: flex; flex-direction: column; gap: 6px; }
+.eq-name { font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.eq-cat { font-size: 11px; }
+.eq-dose { font-size: 13px; color: var(--text-secondary); }
+.eq-equip { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.eq-tag {
+  font-size: 11px; color: var(--text-secondary);
+  border: 1px solid var(--separator); border-radius: var(--radius-sm);
+  padding: 1px 7px;
+}
+.eq-detail { margin-top: 2px; }
+.eq-detail summary { font-size: 12px; color: var(--text-tertiary); cursor: pointer; }
+.eq-cue { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+.eq-reg { font-size: 12px; color: var(--text-tertiary); margin-top: 3px; }
+.eq-add { align-self: flex-end; margin-top: auto; }
+
+/* ---- 动作行原子（AbilityGroup 组内行与总表共用：名称/剂量/倍率/移除） ---- */
+.chosen-name { font-weight: 600; font-size: 14px; }
+.chosen-dose { font-size: 12px; color: var(--text-tertiary); }
+.chosen-ops { display: flex; align-items: center; gap: 8px; }
+.factor-stepper {
+  display: inline-flex; align-items: center; gap: 2px;
+  border: 1px solid var(--separator); border-radius: var(--radius-pill); padding: 2px;
+}
+.factor-stepper button {
+  border: none; background: transparent; width: 26px; height: 26px;
+  border-radius: 50%; font-size: 15px; color: var(--text-secondary);
+}
+.factor-stepper button:hover:not(:disabled) { background: var(--fill); }
+.factor-stepper button:disabled { opacity: 0.3; cursor: default; }
+.factor-stepper span { min-width: 44px; text-align: center; font-size: 13px; font-weight: 600; }
+.factor-stepper span.is-changed { color: var(--accent); }
+.chosen-remove {
+  border: none; background: transparent; color: var(--text-tertiary);
+  width: 28px; height: 28px; border-radius: 50%; font-size: 13px;
+}
+.chosen-remove:hover { background: var(--fill); color: var(--danger); }
+
+/* ---- 总表（PlanTable） ---- */
+.table-scroll { overflow-x: auto; }
+.plan-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
+.plan-table th {
+  text-align: left; font-size: 12px; color: var(--text-tertiary); font-weight: 600;
+  padding: 8px 12px; border-bottom: 1px solid var(--separator);
+}
+.plan-table td { padding: 12px; vertical-align: top; border-bottom: 1px solid var(--separator); }
+.plan-table tbody tr:last-child td { border-bottom: none; }
+.pt-day { white-space: nowrap; font-weight: 600; }
+.pt-theme { min-width: 140px; }
+.pt-targets { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+.pt-target { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pt-items { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
+.pt-item { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pt-cat { font-size: 11px; }
+.pt-dose { font-size: 12px; color: var(--text-tertiary); }
+.pt-est { white-space: nowrap; color: var(--text-secondary); }
+.pt-practice { padding: 14px 12px; font-size: 12px; color: var(--text-secondary); background: var(--bg-elevated-2); }
+.pt-foot { padding: 8px 12px; font-size: 11px; color: var(--text-tertiary); }
+
+/* ---- 专项实践提醒（v1.17 弱化为底部单行小字提示，非卡片） ---- */
+.practice-note {
+  margin: var(--space-4) 0 0;
+  font-size: 12px; color: var(--text-tertiary); text-align: center; line-height: 1.6;
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .eq-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .dash-sections { grid-template-columns: 1fr; }
+  .gap-bar-row { grid-template-columns: 96px 1fr 56px; }
+  .ability-bar { grid-template-columns: 100px 1fr 56px; }
+  .eq-grid { grid-template-columns: 1fr; }
+}
