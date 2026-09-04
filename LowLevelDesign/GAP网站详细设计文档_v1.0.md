@@ -1,12 +1,12 @@
-# GAP 网站（Web）详细设计文档
+﻿# GAP 网站（Web）详细设计文档
 
 General Athletic Preparation Recommendation System — Web Frontend Detailed Design
 
 面向多运动爱好者的通用运动能力评估、能力缺口分析与训练计划生成系统 · **前端与交互详细设计**
 
-版本：v2.0（以当前实现为基准的重写整理版）
-状态：实现基线（As-Built Baseline）
-日期：2026-09-02
+版本：v2.1（v2.0 As-Built 基线之上的变更版，代码尚未落地）
+状态：变更待实现（经审阅确认后按文执行）
+日期：2026-09-04
 上游依赖：[GAP系统设计文档_v1.0.md](../HighLevelDesign/GAP系统设计文档_v1.0.md)
 
 ---
@@ -15,10 +15,10 @@ General Athletic Preparation Recommendation System — Web Frontend Detailed Des
 
 | **项目**   | **内容**                                                                                                                   |
 |------------|----------------------------------------------------------------------------------------------------------------------------|
-| 文档定位   | 网站前端与交互的详细设计（LLD）。**本版为 v2.0 重构整理：以仓库中「当前已实现并可通过 `npm run build` 构建的网站」为唯一事实标准**，凡与既往版本冲突之处一律以本文为准。 |
+| 文档定位   | 网站前端与交互的详细设计（LLD）。**本版 v2.1**：以 v2.0（仓库中「当前已实现并可通过 `npm run build` 构建的网站」）为基线，追加 6 项界面/数据变更（见 §6 对应小节与附录 E），凡与既往版本冲突之处一律以本文为准。 |
 | 技术栈     | React 19 / Next.js（App Router，静态预渲染）/ TypeScript；CSS 变量驱动的设计令牌（Design Tokens）；CSS 存放于 `web/src/app/*.css`。 |
 | 界面语言   | 中英双语（zh-CN 默认 / en-US 可切换）；能力代码（PWR、STR_MAX…）仅存在于数据层，UI 一律展示能力全称。                        |
-| 内容结构   | 同一站点 4 个导航入口：欢迎 `/`、定制计划 `/app/onboarding`、了解GAP `/docs`、我的能力 `/app/training`。                    |
+| 内容结构   | 同一站点 3 个导航入口：欢迎 `/`、定制计划 `/app/onboarding`、了解GAP `/docs`（v2.1 移除「我的能力」；不做用户注册与数据留存）。                    |
 | 评估方式   | 双轨自选：简单自评问卷（SAQ）或专业自测（SPT），向导内二选一后直接进入对应子流程。                                           |
 | 视觉风格   | 参考 Apple 官网的简洁、留白、克制理念；Hero 使用照片背景 + 暗色蒙层；数据可视化使用 3 层能力色板；明/暗双主题。                |
 | 目标读者   | 产品经理、UI/UX 设计师、前端工程师、算法工程师、内容编辑。                                                                  |
@@ -72,7 +72,7 @@ General Athletic Preparation Recommendation System — Web Frontend Detailed Des
 
 # 1. 站点与信息架构
 
-## 1.1 路由清单（当前实现 · 8 条路由 = 7 业务页 + 内置 404）
+## 1.1 路由清单（当前实现 · 7 条路由 = 6 业务页 + 内置 404；v2.1 移除 `/app/training`）
 
 | 路由                | 页面名（中文） | 页面文件                               | 性质     | 数据来源 / 入口                                                             |
 |---------------------|----------------|----------------------------------------|----------|-----------------------------------------------------------------------------|
@@ -81,8 +81,7 @@ General Athletic Preparation Recommendation System — Web Frontend Detailed Des
 | `/app/onboarding`   | 定制计划向导   | `app/app/onboarding/page.tsx`          | 表单流程 | 输入 → 写 `gap.user`/`gap.plan` → `/app/dashboard`                          |
 | `/app/dashboard`    | 能力画像       | `app/app/dashboard/page.tsx`           | 产品页   | 读 `gap.plan`；无 `days` 则回 `/app/onboarding`                             |
 | `/app/plan`         | 训练计划       | `app/app/plan/page.tsx`                | 产品页   | 读/写 `gap.plan`（编排实时写回；确认写 `confirmedAt`）                      |
-| `/app/training`     | 我的能力       | `app/app/training/page.tsx`            | 空态占位 | 静态文案；未来：能力测试 → 能力变化                                          |
-| `/docs`             | 了解GAP        | `app/docs/page.tsx`                    | 空态占位 | 静态文案；未来：知识库/文档站                                                |
+| `/docs`             | 了解GAP        | `app/docs/page.tsx`                    | 空态占位 | 静态文案；未来：知识库/文档站（v2.1 起为唯一占位页）                        |
 | `/_not-found`       | 404            | Next 内置                              | 兜底页   | —                                                                           |
 
 > 页面类型说明：所有页面为 `"use client"` 客户端组件，但页面结构是静态的（无服务端动态数据），构建后输出静态 HTML；客户端仅承担读取 localStorage、切换状态、计算派生值。交互数据不依赖后端。
@@ -102,8 +101,7 @@ GAP Web
 │   ├─ /app/onboarding    5 屏向导：目标运动 → 训练天数 → 评估方式 → 能力评估 → 生成
 │   ├─ /app/dashboard     能力画像：统计卡 / 雷达图 / 缺口条形图 / 每轮训练日卡
 │   ├─ /app/plan          训练计划：编排 Composer（未确认）↔ 只读总表 PlanTable（已确认）
-│   └─ /app/training      我的能力（空态占位）
-└─ /docs                  了解GAP（空态占位）
+└─ /docs                  了解GAP（空态占位；v2.1 起为全站唯一占位页）
 ```
 
 ## 1.3 全局根布局（`app/layout.tsx`）
@@ -117,7 +115,7 @@ GAP Web
 ## 1.4 顶部导航（`components/Nav.tsx`）
 
 ```
-[◉ GAP]   欢迎    定制计划    了解GAP    我的能力          [中|EN] [◐]
+[◉ GAP]   欢迎    定制计划    了解GAP                [中|EN] [◐]
 ```
 
 | 项        | 文案 key          | 路由/行为                                                                    |
@@ -125,8 +123,7 @@ GAP Web
 | Logo      | —（"GAP"）        | `<Link href="/">`，SVG 徽标（圆环 + 圆心点）                                   |
 | 欢迎      | `nav.home`        | `/`，高亮规则 = `pathname === "/"`                                            |
 | 定制计划  | `nav.start`       | `/app/onboarding`，高亮规则 = `pathname.startsWith(href)`                      |
-| 了解GAP   | `nav.docs`        | `/docs`（真实路由），规则同上                                                  |
-| 我的能力  | `nav.training`    | `/app/training`（真实路由），规则同上                                          |
+| 了解GAP   | `nav.docs`        | `/docs`（真实路由），规则同上（v2.1 起导航仅 3 项，`nav.training` 键随页删除）|
 | 语言按钮  | —                | `setLang(lang === "zh" ? "en" : "zh")`；文案显示目标语：zh 态显示 `EN`，en 态显示 `中` |
 | 主题按钮  | —                | `◐`；切 `<html data-theme>` 明/暗，写 `gap.theme`                              |
 
@@ -137,13 +134,13 @@ GAP Web
 ## 1.5 页脚（`components/Footer.tsx`）
 
 ```
-[产品] 欢迎 · 定制计划 · 我的能力   [知识] 了解GAP   [法律] 免责声明   GAP · tagline
+[产品] 欢迎 · 定制计划 ·    [知识] 了解GAP   [法律] 免责声明   GAP · tagline
 © 2026 GAP. GAP 是训练决策工具，不构成医疗建议。
 ```
 
 | 列       | key            | 链接                               |
 |----------|----------------|------------------------------------|
-| 产品     | `footer.product` | `/`（nav.home）、`/app/onboarding`（nav.start）、`/app/training`（nav.training） |
+| 产品     | `footer.product` | `/`（nav.home）、`/app/onboarding`（nav.start） |
 | 知识     | `footer.knowledge` | `/docs`（nav.docs）              |
 | 法律     | `footer.legal` | `免责声明`（仍为无跳转死链 `<a href="#" onClick=preventDefault>`） |
 | 品牌     | `footer.tagline` | `General Athletic Preparation`   |
@@ -265,7 +262,7 @@ GAP Web
 | `AssessmentMode` | `"saq" \| "spt"` | 自评 / 专业自测 |
 | `Layer` | `key, zh, en, cssVar, abilities: string[]` | `cssVar`=`--layer-l1/l2/l3` |
 | `Ability` | `code, zh, en, layer, def` | code=稳定主键（见 附录 D） |
-| `Sport` | `id, zh, en, cat, icon, demand` | `icon`=内联 24×24 SVG 路径；`demand`=18 能力需求 |
+| `Sport` | `id, zh, en, cat, demand` | `demand`=18 能力需求（v2.1 起移除 `icon` 字段） |
 | `Exercise` | `id, zh, en, category, cover, primary, equipment[], setsMin, setsMax, reps, rpe, minutes, cue, regression` | cover=刺激向量，见 4.5 |
 | `SaqQuestion` | `code, zh, en, a0, a5` | a0/a5=滑块两端锚点文案 |
 | `SportGoal` | `id, weight` | 生成输入：目标运动 |
@@ -318,9 +315,9 @@ GAP Web
 
 **三层配色（token）**：L1 `var(--layer-l1)` `#FF3B30` · L2 `--layer-l2` `#34C759` · L3 `--layer-l3` `#0A84FF`；雷达轴标签、能力树/自测分组圆点、移动端能力条按层取色。
 
-## 4.3 运动目录（全量 35 条）
+## 4.3 运动目录（36 条 = 35 真实运动 + 1「平均主义」伪运动）
 
-字段：`id / zh / en / cat`；`demand` 由 12 种子扩维而来（4.3.1）。分类展示顺序（向导 `CAT_ORDER`）= 球类 → 水上 → 雪上 → 攀岩 → 体能 → 户外 → 对抗 → 技巧。
+字段：`id / zh / en / cat`；`demand` 由 12 种子扩维而来（4.3.1）。分类展示顺序（向导 `CAT_ORDER`，v2.1 起）= 平均主义 → 球类 → 水上 → 雪上 → 攀岩 → 体能 → 户外 → 对抗 → 技巧。下表列 35 条真实运动；平均主义见 4.3.2。
 
 | id | 中文 | English | 类 | demand12 种子 `[STR,RSTR,END,PWR,SPDACC,DECCOD,AER,ANARHIA,BAL,COORD,MOB,GRIPCORE]` |
 |---|---|---|---|---|
@@ -359,6 +356,7 @@ GAP Web
 | roller-skating | 轮滑 | Roller Skating | 技巧 | [3,4,4,4,5,5,4,3,5,5,4,1] |
 | skateboarding | 滑板 | Skateboarding | 技巧 | [3,4,3,4,4,5,3,3,5,5,4,1] |
 | parkour | 跑酷 | Parkour | 技巧 | [4,5,4,5,5,5,3,4,5,5,5,2] |
+| balanced | 平均主义 | Balanced | 平均主义 | 见 4.3.2（运行时全量均值，非固定种子） |
 
 ### 4.3.1 12 指标 → 18 能力扩维（`demand12`，引擎固定映射）
 
@@ -371,7 +369,11 @@ GAP Web
 | SPDACC | SPD、ACC | GRIPCORE | GRIP_CORE |
 | DECCOD | DEC_COD | AER | AER_CAP、AER_END |
 
-`icon`：24×24 `viewBox` 线性 SVG（`fill:none; stroke:currentColor`），经 `SportIcon` 注入渲染，装饰性图标不承载信息（替换不改变语义）。
+### 4.3.2 「平均主义」伪运动（v2.1 新增）
+
+`id:"balanced"` · zh `平均主义` · en `Balanced` · cat `平均主义`。**demand12 种子 = 其余全部真实运动（35 条）各指标逐列算术平均、保留 1 位小数、不含自身**；随运动目录增删自动重算（运行期惰性求值，不落静态行）。当前值 ≈ `[3.5, 3.7, 3.9, 3.8, 3.9, 3.7, 4, 3.9, 4.5, 4.7, 3.9, 2.2]`（为 §4.8-2 整数种子规则的一位小数例外）。
+
+**交互规则**：位于向导 `CAT_ORDER` 首位，可**单独选择**；选中即清空其余真实运动并使其实体段隐藏（提示可取消后手动挑选），不与任何真实运动混选。**不进入欢迎页 `#sports` 共享能力演示**（§6.1-⑤）；仅服务「不想仔细挑选运动」的用户。
 
 ## 4.4 自测量表（全量 18 项，`SPT_TESTS`）
 
@@ -423,11 +425,11 @@ GAP Web
 ## 4.8 扩展不变式（数据类）
 
 1. **能力集合 = 各层 `Layer.abilities` 的并集（code 唯一、无遗漏），总数为 18**；新增能力需同步：abilities 全表、所属 Layer.abilities（自动入雷达/树/统计）、SAQ 与 SPT 各补一题、为其提供 ≥3 个可选动作（`cover` 含该能力）。
-2. **运动**：id 唯一 slug、cat 属于 CAT_ORDER（新增类别需同步列表与图标域）、demand 12 种子每值 1–5、icon 内联 SVG；每能力可无 demand 项（未选相关运动能力缺省目标 2.0）。
+2. **运动**：id 唯一 slug、cat 属于 CAT_ORDER（新增类别需同步列表；`balanced` 平均主义为伪运动，见 4.3.2，不入此规则）、demand 12 种子每值 1–5（平均主义例外：1 位小数的全量均值）；v2.1 起**无 icon 字段与图标资源**；每能力可无 demand 项（未选相关运动能力缺省目标 2.0）。
 3. **动作**：id 唯一、cover 值域 0–5 且主刺激能力显式入 cover、category ∈ 18 类（新增类别需同步 `categoryLabel`）、equipment ∈ EQUIPMENT、剂量字段齐全。
 4. **方法块**：能力 code 全覆盖 18 项，band 冲突（AER/ANA 同为 6）允许并列同带。
 5. 双语字段必须成对（`{zh,en}`）；`Localized` 类文案成对且 en 可缺省回落。
-6. 添加全部走 `data.ts` + `i18n.tsx`，页面/引擎零改动即可渲染新数据（引擎遍历 abilities 与 sports 完成；落地页运动 chip、向导列表自动含新行）。
+6. 添加全部走 `data.ts` + `i18n.tsx`，页面/引擎零改动即可渲染新数据（引擎遍历 abilities 与 sports 完成；向导运动卡自动含新行；欢迎页 `#sports` chip 固定为 35 条真实运动文本列表，不含平均主义）。
 
 ---
 
@@ -500,11 +502,11 @@ GAP Web
 
 ## 6.1 欢迎页 `/`（`app/page.tsx`）
 
-**① Hero**（整屏，恒定照片底 + 暗蒙层 + 白字，不随明暗主题）：`background-image: url(/hero-bg.webp)` + `::before` scrim（`rgba(0,0,0,.5)→.22` 渐变）。内容：眉题 `General Athletic Preparation`（三个首字母用 `.gap-accent` 高亮）+ `h1.hero-title`（`hero.title`）+ `p.hero-sub`（副标题）+ CTA 双按钮（`定制计划`→/app/onboarding 主按钮；`了解更多`→锚点 `#what` 次按钮）+ 底部滚动提示（`hero.scrollHint`）。**不含雷达图/半圆，不含剪影/粒子层**。
+**① Hero**（整屏，恒定照片底 + 暗蒙层 + 白字，不随明暗主题）：`background-image: url(/hero-bg.webp)` + `::before` scrim（`rgba(0,0,0,.5)→.22` 渐变）。内容：眉题 `General Athletic Preparation`（三个首字母用 `.gap-accent` 高亮）+ `h1.hero-title`（`hero.title`）+ `p.hero-sub`（副标题）+ CTA 双按钮：**左次按钮 `了解 GAP`（hero.cta2，btn-secondary）→ 锚点 `#what`；右主按钮 `定制计划`（hero.cta，btn-primary）→ `/app/onboarding`（v2.1 由主前副后对调为左副右主）**+ 底部滚动提示（`hero.scrollHint`）。**不含雷达图/半圆，不含剪影/粒子层**。
 **② 是什么 / 不是什么**（`#what`）：眉题 + 标题 + hook + 副文，居中 measure；两张对列卡片（Reveal 100ms 错峰）：`✓ yes1-3` / `✕ no1-3` 列表，左右圆点 `.mark yes/no`。
 **③ 18 能力 3 层树状图**（`#map`）：标题区后按 `layers` 渲染三张卡片（每层卡片：层色 `.category-dot` + `L(层名)` + `.ability-grid` 内该层全部能力格 `.ability-cell`：能力全称 + 一句 def），Reveal 逐层显现。**无点击展开/收起**。
 **④ 如何运作**（`#steps`）：6 步 `STEPS`（key `step.1..6`），Reveal 每步 `delay=i*60`；每步仅图标（数字 1–6）+ 标题。**不再渲染步骤描述**。
-**⑤ 共享能力**（`#sports`）：全部 35 运动 chip（SportIcon + `L(zh,en)`，`selectedSports` 内 is-active），默认选中 `[bouldering, skiing, badminton]`；点击 toggle，**上限 5**、可减到 0。下方 `RadarChart current={demandProfile} showLegend={false}`（只呈现当前多边形，无图例）；`demandProfile[能力]` = 已选运动该项需求均值（未选 0）。图形下方一行：已选 ≥1 → 名字 `" + "` 连接；0 → 文案 `至少选择 1 项运动`。
+**⑤ 共享能力**（`#sports`）：35 条真实运动**纯文字 chip**（`L(zh,en)`，无图标，`selectedSports` 内 is-active），默认选中 `[bouldering, skiing, badminton]`；点击 toggle，**上限 5**、可减到 0（不含「平均主义」伪运动，见 4.3.2）。下方 `RadarChart current={demandProfile} showLegend={false}`（只呈现当前多边形，无图例）；`demandProfile[能力]` = 已选运动该项需求均值（未选 0）。图形下方一行：已选 ≥1 → 名字 `" + "` 连接；0 → 文案 `至少选择 1 项运动`。
 **⑥ 底部 CTA**（`section--tight`）：标题 + 主按钮（→/app/onboarding）+ 页脚免责一行。落地页所有 CTA 文案走 `hero.*/what.*/map.*/steps.*/sports.*/cta.*`。
 
 ## 6.2 应用入口 `/app`（`app/app/page.tsx`）
@@ -515,7 +517,10 @@ GAP Web
 
 **壳**：顶部 5 段进度条（`.seg`，is-done/is-active）；页头 `Step n / 5` + 标题（`TITLES`=ob.step2..step6）+ 副文（`SUBS`）；内容 `.wizard-card`；底部按钮对（左 `.back` 步骤 1 隐藏占位，右主按钮 `.next/.generate`，generating 时禁用）。
 **状态机** `WizardState{step,sports,constraints{daysPerWeek:3},mode:"saq",saq:{},spt:{}}`；`patch/patchConstraints` 增量更新。
-- **Step 1 目标运动**（ob.step2）：`已选 n / 6 项`；按 `CAT_ORDER`（球类→…→技巧）分组，逐运动一行：未选点击整行选择（默认重视度 medium），选中后行内出现 Segmented `低/中/高`；选满 6 后新选择被忽略；可反点取消。next 校验 ≥2（不足 alert 提示）。单次选择不会滚动到底。
+- **Step 1 目标运动**（ob.step2，v2.1 起卡片网格）：副文 `ob.step2.sub` = 「选择 1–6 项…/ Choose 1–6 sports…」；计数 `已选 n 项`。按 `CAT_ORDER`（平均主义 → 球类 → … → 技巧）分段渲染；每类段 = 标题 + `.sport-grid`（`grid-template-columns: repeat(auto-fill, minmax(≈148px,1fr))`，**致密卡片**，同类并排多张而非单列纵向）：
+  - `.sport-card`：整面可点；主行中文名 + 小字 English；选中加 `.is-active` 描边与对勾，卡内底部露出 Segmented `低/中/高`（重视度，默认 medium）；再次点击取消该运动。
+  - 真实运动**上限 6**：选满后其余卡禁用（提示先取消再换）；`next` 校验 **≥1**，不足 alert「请至少选择 1 项目标运动。」。
+  - 「平均主义」段仅一张特殊卡 `.sport-card--balanced`（副行「按全部运动平均水平定制」）：选中即清空全部真实运动并隐藏其实体段（显示「已选平均主义，取消后可手动挑选」提示）；与真实运动**互斥、只可单独选**。
 - **Step 2 每轮训练天数**（ob.step3）：Field + `− 数字 ＋` 步进（1–7，icon-btn），初始 3。
 - **Step 3 评估方式**（ob.step4）：两卡片（saq / spt）`card--interactive is-selected`，含标题与描述；键盘可操作。
 - **Step 4 评估**（ob.step5）：`mode==="saq"` → **SAQ 自评**：按 `layers` 分组（组头 = 层色圆点 + 层名），每层内按数组序渲染全部该层能力，每条 = 题干（saq 题）+ range 滑块 0–5 + 当前值 + 两端锚点 a0/a5；缺省值 3。`mode==="spt"` → **SPT 专业自测**：提示「覆盖全部 18 项能力…留空用默认先验」；两列 grid，每项 = 字段（SPT_TESTS 表）+ number 输入（placeholder 单位，可留空）。底部提示「自评用于生成第一版计划，可随时用专业自测校准」。
@@ -529,7 +534,7 @@ GAP Web
 **统计磁贴**（.stat-tile×4）：`需提升能力 g.gaps.length/18` · `高优先级 highCount`（整体 deficit 三档 high 计数，§5.6）· `每轮训练 cycleDays 次` · `目标运动 sports.length`。
 **区块 ① 能力雷达**（`dash.radar`）：卡片内 `.dash-radar-wrap`；桌面 = RadarChart（current/target 双多边形）；移动 = AbilityBar 每能力（现状条 + 目标刻度）。
 **区块 ② 能力缺口**（`dash.gaps`）：顶部三档图例（`.legend-dot is-high/mid/low` + `高 ≥1.0 / 中 0.5–1.0 / 低 <0.5`）；卡片内 `GapBarChart gaps`；无缺口 → 维持文案。
-**区块 ③ 每日概览**（`dash.week`）：卡片内 `.day-tiles` 每训练日 tile：`label` + 编排计数（choices 数 → `n 项` 否则 `待编排`）、主题行、`duration 分钟`；tile 不可点击。卡底按钮 `查看计划`→/app/plan。
+**区块 ③ 每日概览**（`dash.week`）：卡片内 `.day-tiles` 每训练日 tile：`label` + 编排计数（choices 数 → `n 项` 否则 `待编排`）、主题行、`duration 分钟`；tile 不可点击。卡底按钮 `定制完整计划`（dash.viewPlan；v2.1 由「查看完整计划」改名）→/app/plan。
 数据均来自 plan（编排中写回实时反映）。
 
 ## 6.5 训练计划 `/app/plan`（`app/app/plan/page.tsx`）
@@ -545,11 +550,10 @@ GAP Web
 - **写回（persist）**：每次操作归一化 `ability` 归属后整体 `store.set("gap.plan", …)`（§4.7）；读旧数据时显示层同样 tagOwner 归一。
 - **编排合法性**：同天重复动作禁止加入；倍率在 FACTORS 内循环。
 
-## 6.6 占位页（未来内容入口）
+## 6.6 占位页（v2.1 起仅 `/docs` 一处）
 
-**`/app/training` 我的能力**：居中卡片区——标题 `我的能力 My Abilities` + 一句副文「提交一次能力测试后，这里将展示你的能力变化。」（`.section.center`，`minHeight:55vh` 垂直居中）。无导航入口（仅 Footer 链接 / 落地页外链）；后续承接「复测成绩 → 能力时间线」。
-**`/docs` 什么是 GAP**：同构占位——`了解 GAP About GAP` + 副文「知识库正在建设中——…18 能力地图、计划如何生成、安全须知…」；导航可见（nav.docs）。
-两者共用一个 404 式居中空态视觉，仅文案与标题不同；**现阶段无更多功能**。
+**`/docs` 了解 GAP**：居中卡片区——标题 + 副文「知识库正在建设中——…18 能力地图、计划如何生成、安全须知…」（`.section.center`，`minHeight:55vh` 垂直居中）；导航可见（nav.docs）。
+**v2.1 移除 `/app/training`「我的能力」占位页**（`app/app/training/page.tsx` 整体删除；不做用户注册与复测留存）；现阶段无更多功能，后续承接项见 §9。
 
 ---
 
@@ -563,7 +567,6 @@ GAP Web
 | `Footer` | components/Footer.tsx | §1.5 完整规格（4 列 + 免责条） |
 | `Providers` | components/Providers.tsx | 包一层 `I18nProvider` |
 | `Reveal` | components/Reveal.tsx | 视口显现；无 IO 兼容直接 visible；`.data-reveal→.is-visible`；delay→transitionDelay |
-| `SportIcon` | components/SportIcon.tsx | 24×24 线性 SVG 容器，`dangerouslySetInnerHTML` 注入 sport.icon；aria-hidden |
 
 ## 7.2 数据可视化组件
 
@@ -629,7 +632,7 @@ GAP Web
 
 # 9. 范围外 · 路线图（单行）
 
-后续候选（未立项规格，按需单独立版展开）：① 我的能力：提交自测成绩并留存 → 能力时间线与进步曲线（/app/training 落地）；② 完整文档站：GAP 方法论/18 能力地图/计划原理/安全须知（/docs 落地）；③ 计划复测与新轮次生成、计划到期提醒与自由日建议；④ mock → 真实后端：版本化能力/动作知识库与计划算法服务（替换 engine generatePlan 接口，`algorithm_version` 随之升级）；⑤ 用户账户、设备间同步（localStorage → 云端，gap.* 键位保留）；⑥ SPT 完整流程协议化、动作视频与演示动图、计划导出/打印。功能对齐原则：以上任一立项均须回到本 LLD 版本化新增章节，而非就地堆砌。
+后续候选（未立项规格，按需单独立版展开）：① 完整文档站：GAP 方法论/18 能力地图/计划原理/安全须知（/docs 落地）；② 计划复测与新轮次生成、计划到期提醒与自由日建议；③ mock → 真实后端：版本化能力/动作知识库与计划算法服务（替换 engine generatePlan 接口，`algorithm_version` 随之升级）；④ SPT 完整流程协议化、动作视频与演示动图、计划导出/打印；⑤ 用户账户、设备间同步（localStorage → 云端，gap.* 键位保留）——v2.1 注：用户已明确**不做注册/留存**，「我的能力」复测页与账户类短期均不立项。功能对齐原则：以上任一立项均须回到本 LLD 版本化新增章节，而非就地堆砌。
 
 ---
 
@@ -642,7 +645,6 @@ GAP Web
 | `/app/onboarding` | `app/app/onboarding/page.tsx` | 5 步向导 |
 | `/app/dashboard` | `app/app/dashboard/page.tsx` | 仪表盘 |
 | `/app/plan` | `app/app/plan/page.tsx` | 计划编排/总表 |
-| `/app/training` | `app/app/training/page.tsx` | 我的能力（占位） |
 | `/docs` | `app/docs/page.tsx` | 知识库（占位） |
 | 404 | Next 默认 not-found | |
 | 全局壳 | `app/layout.tsx` | CSS 顺序 + 主题内联脚本 + Providers>Nav>main>Footer |
@@ -653,14 +655,15 @@ GAP Web
 
 | 文件 | 职责 | 状态 |
 |---|---|---|
-| Nav / Footer / Providers / Reveal / SportIcon | 骨架与通用 | 在用 |
+| Nav / Footer / Providers / Reveal | 骨架与通用 | 在用 |
 | RadarChart / AbilityBar / GapBarChart | 可视化 | 在用 |
 | DayTabs / AbilityGroup / ExercisePicker / PlanTable / shared.ts | 计划 | 在用 |
 | SilhouetteLayer / ParticleLayer | Hero 旧装饰 | **未引用 · 建议删除** |
+| SportIcon / Sport.icon SVG | 运动图标资源 | **v2.1 已删除**（运动一律纯文字，无图标） |
 
 # 附录 C 数据扩展手册
 
-**C.1 新增运动**：在 `data.ts` `sports[]` 内补行（id/zh/en/cat/icon/demand12(12 种子)/…），cat 若为新类别同步 `CAT_ORDER`（向导顺序）；若新运动 icon 缺省用模板。规则见 §4.8-2。落地页 chip、向导自动出现；引擎聚合自动纳入。**C.2 新增能力**：按 4.2 补全三层表 → 数据文件同步（abilities、所属 Layer.abilities、demand12 若改映射、SAQ 1 题、SPT_TESTS 1 条、覆盖该能力的动作 ≥3）。雷达/树/统计卡片分母自动更新。**C.3 新增动作**：示例——加入以 STR_MAX 为主刺激的 `E("...", "…", "…", "squat", 3, 4, "6-8", "7-8", 6, ["杠铃"], "要点…", "退阶…", "STR_MAX", [["STR_MAX", 0.5], ["STAB", 0.25]])`：**主刺激能力必须同时出现在 cover 元组**（否则不进入 STR_MAX 候选/推荐），category 须 ∈18 类（或同步 categoryLabel），equipment ∈ EQUIPMENT。**C.4 新增量表档位/锚点**：SPT ranges 升序二元组、SAQ a0/a5 文案改 data.ts 即生效；单位与 placeholder 同步。**C.5 接真实后端**：保持 `generatePlan(UserData): Plan` 契约与 `Plan` 结构（gap.plan 键位、`algorithm_version` 字段标识），后端实现后仅换 import 源，前端无改动。
+**C.1 新增运动**：在 `data.ts` `sports[]` 内补行（id/zh/en/cat/demand12(12 种子)；v2.1 起**无 icon 字段**），cat 若为新类别同步 `CAT_ORDER`（向导顺序；首位为「平均主义」伪运动段）。规则见 §4.8-2。向导运动卡自动出现；欢迎页 `#sports` chip 固定渲染 35 条真实运动（不含平均主义）；引擎聚合自动纳入；新增真实运动会令 `balanced` 均值自动重算（4.3.2）。**C.2 新增能力**：按 4.2 补全三层表 → 数据文件同步（abilities、所属 Layer.abilities、demand12 若改映射、SAQ 1 题、SPT_TESTS 1 条、覆盖该能力的动作 ≥3）。雷达/树/统计卡片分母自动更新。**C.3 新增动作**：示例——加入以 STR_MAX 为主刺激的 `E("...", "…", "…", "squat", 3, 4, "6-8", "7-8", 6, ["杠铃"], "要点…", "退阶…", "STR_MAX", [["STR_MAX", 0.5], ["STAB", 0.25]])`：**主刺激能力必须同时出现在 cover 元组**（否则不进入 STR_MAX 候选/推荐），category 须 ∈18 类（或同步 categoryLabel），equipment ∈ EQUIPMENT。**C.4 新增量表档位/锚点**：SPT ranges 升序二元组、SAQ a0/a5 文案改 data.ts 即生效；单位与 placeholder 同步。**C.5 接真实后端**：保持 `generatePlan(UserData): Plan` 契约与 `Plan` 结构（gap.plan 键位、`algorithm_version` 字段标识），后端实现后仅换 import 源，前端无改动。
 
 # 附录 D 术语对照（能力 code ↔ 全称 ↔ English）
 
@@ -685,6 +688,7 @@ GAP Web
 |---|---|---|
 | v1.0–v1.19 | — | 历史迭代（落地页多次改版、动作库扩编 64、轮模型、去达成/达标、去精度、动态容量、动作单归属等）；阶段细节已并入本文各章节 |
 | **v2.0** | 2026-09-02 | **以当前网页为标准的整理版（As-Built）**：重建同文件；文档原则「代码/数据文件为唯一事实源」；正文重排为「页面规格 + 集中数据层」；删除全部未上线章节（评估成绩/日志/为什么/进步、完整文档站、后端 API 合同等）→ §9 单行路线图；数据层表全量入 §4 并附扩展不变式与附录 C；仓库外内容（剪影/粒子/旧 5 类分组）从规格中移除并标记死代码 |
+| **v2.1** | 2026-09-04 | **6 项变更（需求已确认；代码待「执行」后落地）**：① 移除「我的能力」界面 `/app/training`（删页面及导航/页脚入口，不做注册与复测留存；占位页仅余 /docs）；② 欢迎页 Hero CTA 左右对调——左次按钮 `了解 GAP`（hero.cta2 →`#what`）、右主按钮 `定制计划`（hero.cta →`/app/onboarding`）；③ 运动去图标——欢迎页共享能力 chips 纯文字，删 `SportIcon` 组件、`Sport.icon` 字段与全部 SVG 资源；④ 向导 Step 1 目标运动按类别改为致密卡片网格（`.sport-grid`/`.sport-card`，auto-fill minmax≈148px）；⑤ Step 1 最少选 1 项即可 + 新增「平均主义」伪运动（置首段、单卡、全量均值种子 ≈`[3.5,3.7,…]`、与真实运动互斥单选；§4.3.2）；⑥ 计划按钮 `查看完整计划`→`定制完整计划`（dash.viewPlan）。连带文案：ob.step2.sub、step.1.d 由「2–6 项」改「1–6 项」。 |
 
 > 文档维护规则见「版本原则与文档维护」。本文件与 `web/src` 对不上即为待办：先改页面或数据，再升版本号并回填本表。
 

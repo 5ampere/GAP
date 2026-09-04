@@ -47,9 +47,6 @@ export default function Nav() {
           <Link href="/docs" className={active("/docs") ? "is-active" : ""}>
             {t("nav.docs")}
           </Link>
-          <Link href="/app/training" className={active("/app/training") ? "is-active" : ""}>
-            {t("nav.training")}
-          </Link>
         </nav>
         <div className="nav-actions">
           <button className="icon-btn" type="button" onClick={() => setLang(lang === "zh" ? "en" : "zh")}>

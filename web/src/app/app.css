@@ -10,26 +10,39 @@
 .wizard-panel.is-active { display: block; animation: fadeIn var(--dur-base) var(--ease-standard); }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
-/* 运动选择卡片 */
-.sport-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-4); }
+/* 运动选择卡片（v2.1：无图标 · 同类同网格密集展示 · 选中卡片内含强度三档） */
+.sport-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(122px, 1fr)); gap: 10px; }
 .sport-card {
-  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
-  padding: var(--space-5); border: 1.5px solid var(--separator);
-  border-radius: var(--radius-md); background: var(--bg-page);
-  cursor: pointer; text-align: center; position: relative;
-  transition: all var(--dur-fast) var(--ease-standard);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; min-height: 64px; padding: 10px 8px;
+  border: 1.5px solid var(--separator); border-radius: var(--radius-md);
+  background: var(--bg-page); cursor: pointer; text-align: center;
+  position: relative; user-select: none;
+  transition: border-color var(--dur-fast) var(--ease-standard), background var(--dur-fast) var(--ease-standard);
 }
-.sport-card:hover { border-color: var(--text-tertiary); }
+.sport-card:hover:not(.is-disabled) { border-color: var(--text-tertiary); }
 .sport-card.is-selected { border-color: var(--accent); background: var(--accent-faint); }
-.sport-card svg { width: 34px; height: 34px; color: var(--text-primary); }
-.sport-card .sport-name { font-size: 14px; font-weight: 500; }
-.sport-card .sport-cat { font-size: 11px; color: var(--text-tertiary); }
+.sport-card.is-selected:hover { border-color: var(--accent); }
+.sport-card.is-disabled { opacity: 0.45; cursor: not-allowed; }
+.sport-card.is-disabled:hover { border-color: var(--separator); }
+.sport-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sport-name { font-size: 13px; font-weight: 500; line-height: 1.25; }
+.sport-cat { font-size: 11px; line-height: 1.2; color: var(--text-tertiary); }
 .sport-card .check {
-  position: absolute; top: 8px; right: 8px; width: 18px; height: 18px;
+  position: absolute; top: 6px; right: 6px; width: 18px; height: 18px;
   border-radius: 50%; background: var(--accent); color: #fff;
-  display: none; align-items: center; justify-content: center; font-size: 12px;
+  display: none; align-items: center; justify-content: center; font-size: 11px;
 }
 .sport-card.is-selected .check { display: flex; }
+/* 选中卡片底部：强度三档（低/中/高）——窄卡内紧凑化，同宽均分 */
+.sport-card-seg { width: 100%; margin-top: auto; padding-top: 6px; }
+.sport-card-seg .segmented { width: 100%; border-radius: var(--radius-sm); }
+.sport-card-seg .segmented button {
+  flex: 1 1 0; min-width: 0; padding: 4px 2px; font-size: 11px;
+  border-radius: var(--radius-sm); line-height: 1;
+}
+/* 平均主义：单卡随网格列宽保持紧凑 */
+.sport-card--balanced { min-height: 70px; }
 
 /* SAQ 自评滑块 */
 .saq-list { display: flex; flex-direction: column; gap: var(--space-4); }

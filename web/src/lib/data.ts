@@ -44,49 +44,59 @@ function demand12(d: number[]): Record<string, number> {
 
 export const sports: Sport[] = [
   // 球类（10）
-  { id: "basketball", zh: "篮球", en: "Basketball", cat: "球类", icon: '<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4v16"/><path d="M5.5 5.5c4 4 9 4 13 13M18.5 5.5c-4 4-9 4-13 13"/>', demand: demand12([4, 4, 3, 5, 5, 5, 4, 5, 4, 5, 3, 2]) },
-  { id: "soccer", zh: "足球", en: "Soccer", cat: "球类", icon: '<circle cx="12" cy="12" r="8"/><path d="M12 7l3.2 2.3-1.2 3.8h-4L8.8 9.3z"/>', demand: demand12([4, 4, 4, 4, 5, 5, 5, 5, 4, 5, 3, 1]) },
-  { id: "tennis", zh: "网球", en: "Tennis", cat: "球类", icon: '<circle cx="8" cy="12" r="4"/><path d="M8 8v8M4 12h8M12 16l8 2"/>', demand: demand12([3, 3, 3, 4, 5, 5, 4, 5, 5, 5, 4, 2]) },
-  { id: "badminton", zh: "羽毛球", en: "Badminton", cat: "球类", icon: '<path d="M12 4l4 4-4 2-4-2z"/><path d="M12 10v4M9 14l-2 3M15 14l2 3"/>', demand: demand12([3, 3, 3, 4, 5, 5, 4, 5, 5, 5, 4, 1]) },
-  { id: "volleyball", zh: "排球", en: "Volleyball", cat: "球类", icon: '<circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/>', demand: demand12([4, 4, 2, 5, 4, 4, 3, 4, 4, 5, 3, 1]) },
-  { id: "table-tennis", zh: "乒乓球", en: "Table Tennis", cat: "球类", icon: '<circle cx="15" cy="10" r="4"/><path d="M11 14l-5 6M8 6l4 2"/>', demand: demand12([2, 2, 2, 2, 5, 4, 3, 4, 4, 5, 3, 1]) },
-  { id: "squash", zh: "壁球", en: "Squash", cat: "球类", icon: '<circle cx="12" cy="12" r="3"/><path d="M12 15l7 5M12 9L5 4"/>', demand: demand12([3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 3, 1]) },
-  { id: "pickleball", zh: "匹克球", en: "Pickleball", cat: "球类", icon: '<circle cx="12" cy="12" r="7"/><path d="M12 5l4-2M12 5L8 3"/>', demand: demand12([2, 2, 2, 3, 4, 4, 3, 3, 4, 5, 3, 1]) },
-  { id: "frisbee", zh: "飞盘", en: "Frisbee", cat: "球类", icon: '<ellipse cx="12" cy="12" rx="9" ry="4"/><path d="M12 8v8"/>', demand: demand12([3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 3, 2]) },
-  { id: "golf", zh: "高尔夫", en: "Golf", cat: "球类", icon: '<circle cx="10" cy="20" r="2"/><path d="M12 18V6l4 2-3 4"/>', demand: demand12([3, 3, 2, 3, 2, 1, 2, 1, 3, 5, 5, 3]) },
+  { id: "basketball", zh: "篮球", en: "Basketball", cat: "球类", demand: demand12([4, 4, 3, 5, 5, 5, 4, 5, 4, 5, 3, 2]) },
+  { id: "soccer", zh: "足球", en: "Soccer", cat: "球类", demand: demand12([4, 4, 4, 4, 5, 5, 5, 5, 4, 5, 3, 1]) },
+  { id: "tennis", zh: "网球", en: "Tennis", cat: "球类", demand: demand12([3, 3, 3, 4, 5, 5, 4, 5, 5, 5, 4, 2]) },
+  { id: "badminton", zh: "羽毛球", en: "Badminton", cat: "球类", demand: demand12([3, 3, 3, 4, 5, 5, 4, 5, 5, 5, 4, 1]) },
+  { id: "volleyball", zh: "排球", en: "Volleyball", cat: "球类", demand: demand12([4, 4, 2, 5, 4, 4, 3, 4, 4, 5, 3, 1]) },
+  { id: "table-tennis", zh: "乒乓球", en: "Table Tennis", cat: "球类", demand: demand12([2, 2, 2, 2, 5, 4, 3, 4, 4, 5, 3, 1]) },
+  { id: "squash", zh: "壁球", en: "Squash", cat: "球类", demand: demand12([3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 3, 1]) },
+  { id: "pickleball", zh: "匹克球", en: "Pickleball", cat: "球类", demand: demand12([2, 2, 2, 3, 4, 4, 3, 3, 4, 5, 3, 1]) },
+  { id: "frisbee", zh: "飞盘", en: "Frisbee", cat: "球类", demand: demand12([3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 3, 2]) },
+  { id: "golf", zh: "高尔夫", en: "Golf", cat: "球类", demand: demand12([3, 3, 2, 3, 2, 1, 2, 1, 3, 5, 5, 3]) },
   // 水上（5）
-  { id: "swimming", zh: "游泳", en: "Swimming", cat: "水上", icon: '<path d="M3 9c2-2 4 2 6 0s4-2 6 0 4 2 6 0M3 15c2-2 4 2 6 0s4-2 6 0 4 2 6 0"/>', demand: demand12([3, 3, 4, 3, 4, 1, 5, 4, 4, 5, 5, 3]) },
-  { id: "surfing", zh: "冲浪", en: "Surfing", cat: "水上", icon: '<path d="M3 13c3-2 6-2 9 0s6 2 9 0"/><path d="M5 17c3-2 6-2 9 0s6 2 9 0M12 10l4-5-4 2z"/>', demand: demand12([4, 4, 4, 5, 3, 4, 4, 4, 5, 5, 5, 3]) },
-  { id: "kayaking", zh: "皮划艇", en: "Kayaking", cat: "水上", icon: '<path d="M3 16l18-7M3 16c0 4 18 4 18 0z"/><path d="M9 11l2-4h4"/>', demand: demand12([4, 4, 5, 3, 3, 2, 5, 4, 4, 4, 4, 5]) },
-  { id: "sup", zh: "SUP 桨板", en: "Stand-up Paddle", cat: "水上", icon: '<path d="M4 14h16M7 14l2-6h8l2 6"/>', demand: demand12([3, 3, 4, 2, 2, 2, 4, 2, 5, 5, 4, 3]) },
-  { id: "rowing", zh: "划船", en: "Rowing", cat: "水上", icon: '<path d="M4 14h16"/><path d="M8 11l2-4h4l2 4"/>', demand: demand12([5, 4, 5, 4, 3, 1, 5, 5, 3, 4, 3, 4]) },
+  { id: "swimming", zh: "游泳", en: "Swimming", cat: "水上", demand: demand12([3, 3, 4, 3, 4, 1, 5, 4, 4, 5, 5, 3]) },
+  { id: "surfing", zh: "冲浪", en: "Surfing", cat: "水上", demand: demand12([4, 4, 4, 5, 3, 4, 4, 4, 5, 5, 5, 3]) },
+  { id: "kayaking", zh: "皮划艇", en: "Kayaking", cat: "水上", demand: demand12([4, 4, 5, 3, 3, 2, 5, 4, 4, 4, 4, 5]) },
+  { id: "sup", zh: "SUP 桨板", en: "Stand-up Paddle", cat: "水上", demand: demand12([3, 3, 4, 2, 2, 2, 4, 2, 5, 5, 4, 3]) },
+  { id: "rowing", zh: "划船", en: "Rowing", cat: "水上", demand: demand12([5, 4, 5, 4, 3, 1, 5, 5, 3, 4, 3, 4]) },
   // 雪上（4）
-  { id: "skiing", zh: "高山滑雪", en: "Alpine Skiing", cat: "雪上", icon: '<path d="M4 19l8-4M12 15l7-7M14 19l-4-2"/>', demand: demand12([4, 4, 4, 5, 4, 5, 4, 4, 5, 5, 4, 2]) },
-  { id: "snowboarding", zh: "单板滑雪", en: "Snowboarding", cat: "雪上", icon: '<path d="M5 18l14-4M11 9l5 4-4 1z"/>', demand: demand12([4, 4, 4, 5, 4, 5, 4, 4, 5, 5, 5, 2]) },
-  { id: "xc-skiing", zh: "越野滑雪", en: "Cross-country Skiing", cat: "雪上", icon: '<path d="M4 18l6-2 4-6 5-1M8 16l-2 3M15 9l3-4M10 16l3 2"/>', demand: demand12([4, 4, 5, 3, 4, 3, 5, 4, 4, 4, 3, 2]) },
-  { id: "skating", zh: "滑冰", en: "Skating", cat: "雪上", icon: '<path d="M6 18l3-8 3 8M6 18l-2-1M12 18l2-1"/>', demand: demand12([4, 4, 4, 5, 5, 5, 4, 4, 5, 5, 4, 1]) },
+  { id: "skiing", zh: "高山滑雪", en: "Alpine Skiing", cat: "雪上", demand: demand12([4, 4, 4, 5, 4, 5, 4, 4, 5, 5, 4, 2]) },
+  { id: "snowboarding", zh: "单板滑雪", en: "Snowboarding", cat: "雪上", demand: demand12([4, 4, 4, 5, 4, 5, 4, 4, 5, 5, 5, 2]) },
+  { id: "xc-skiing", zh: "越野滑雪", en: "Cross-country Skiing", cat: "雪上", demand: demand12([4, 4, 5, 3, 4, 3, 5, 4, 4, 4, 3, 2]) },
+  { id: "skating", zh: "滑冰", en: "Skating", cat: "雪上", demand: demand12([4, 4, 4, 5, 5, 5, 4, 4, 5, 5, 4, 1]) },
   // 攀岩（2）
-  { id: "bouldering", zh: "抱石", en: "Bouldering", cat: "攀岩", icon: '<circle cx="6" cy="6" r="1.6"/><circle cx="12" cy="4" r="1.6"/><circle cx="18" cy="7" r="1.6"/><circle cx="19" cy="15" r="1.6"/><circle cx="12" cy="19" r="1.6"/><circle cx="5" cy="14" r="1.6"/>', demand: demand12([4, 5, 4, 4, 2, 2, 2, 5, 5, 5, 5, 5]) },
-  { id: "sport-climbing", zh: "运动攀岩", en: "Sport Climbing", cat: "攀岩", icon: '<circle cx="7" cy="7" r="2"/><path d="M7 9c1 4 3 6 3 11M8 9l6-3"/>', demand: demand12([4, 5, 5, 3, 2, 2, 3, 5, 5, 5, 5, 5]) },
+  { id: "bouldering", zh: "抱石", en: "Bouldering", cat: "攀岩", demand: demand12([4, 5, 4, 4, 2, 2, 2, 5, 5, 5, 5, 5]) },
+  { id: "sport-climbing", zh: "运动攀岩", en: "Sport Climbing", cat: "攀岩", demand: demand12([4, 5, 5, 3, 2, 2, 3, 5, 5, 5, 5, 5]) },
   // 体能（4）
-  { id: "running", zh: "跑步", en: "Running", cat: "体能", icon: '<circle cx="14" cy="4.5" r="2"/><path d="M13 8l-3.5 2.5L7 9M13 8l1.5 3 4.5 1M9.5 10.5L11 15l-3 3M9.5 10.5L13 11"/>', demand: demand12([3, 4, 5, 3, 5, 2, 5, 3, 4, 4, 3, 1]) },
-  { id: "trail-running", zh: "越野跑", en: "Trail Running", cat: "体能", icon: '<path d="M3 20l9-10 3 2 5-3"/><circle cx="15" cy="4" r="2"/>', demand: demand12([3, 4, 5, 4, 4, 4, 5, 4, 5, 4, 4, 1]) },
-  { id: "cycling", zh: "骑行", en: "Cycling", cat: "体能", icon: '<circle cx="6" cy="17" r="3.5"/><circle cx="18" cy="17" r="3.5"/><path d="M6 17l5-6 7 2M11 11l1-4h4"/>', demand: demand12([4, 4, 5, 3, 4, 2, 5, 4, 3, 4, 3, 2]) },
-  { id: "jump-rope", zh: "跳绳", en: "Jump Rope", cat: "体能", icon: '<path d="M5 4c6-4 8 16 14 12M9 18c0 4 6 0 6 0"/>', demand: demand12([2, 3, 4, 4, 4, 4, 4, 4, 5, 5, 3, 1]) },
+  { id: "running", zh: "跑步", en: "Running", cat: "体能", demand: demand12([3, 4, 5, 3, 5, 2, 5, 3, 4, 4, 3, 1]) },
+  { id: "trail-running", zh: "越野跑", en: "Trail Running", cat: "体能", demand: demand12([3, 4, 5, 4, 4, 4, 5, 4, 5, 4, 4, 1]) },
+  { id: "cycling", zh: "骑行", en: "Cycling", cat: "体能", demand: demand12([4, 4, 5, 3, 4, 2, 5, 4, 3, 4, 3, 2]) },
+  { id: "jump-rope", zh: "跳绳", en: "Jump Rope", cat: "体能", demand: demand12([2, 3, 4, 4, 4, 4, 4, 4, 5, 5, 3, 1]) },
   // 户外（3）
-  { id: "hiking", zh: "徒步", en: "Hiking", cat: "户外", icon: '<path d="M3 19L9 7l3 6 2-3 5 9z"/><path d="M12 13v6"/>', demand: demand12([3, 3, 5, 2, 1, 2, 5, 2, 4, 3, 3, 2]) },
-  { id: "mountaineering", zh: "登山", en: "Mountaineering", cat: "户外", icon: '<path d="M3 19L9 7l3 6 3-4 6 10z"/>', demand: demand12([4, 4, 5, 3, 2, 3, 5, 3, 5, 4, 4, 3]) },
-  { id: "mountain-bike", zh: "山地车", en: "Mountain Biking", cat: "户外", icon: '<circle cx="6" cy="17" r="3.5"/><circle cx="18" cy="17" r="3.5"/><path d="M6 17l5-7 7 3M11 10l1-4h4"/>', demand: demand12([4, 4, 4, 4, 4, 5, 4, 4, 5, 5, 4, 2]) },
+  { id: "hiking", zh: "徒步", en: "Hiking", cat: "户外", demand: demand12([3, 3, 5, 2, 1, 2, 5, 2, 4, 3, 3, 2]) },
+  { id: "mountaineering", zh: "登山", en: "Mountaineering", cat: "户外", demand: demand12([4, 4, 5, 3, 2, 3, 5, 3, 5, 4, 4, 3]) },
+  { id: "mountain-bike", zh: "山地车", en: "Mountain Biking", cat: "户外", demand: demand12([4, 4, 4, 4, 4, 5, 4, 4, 5, 5, 4, 2]) },
   // 对抗（3）
-  { id: "boxing", zh: "拳击", en: "Boxing", cat: "对抗", icon: '<circle cx="13" cy="10" r="5"/><path d="M13 5V3l5 3-4 2z"/>', demand: demand12([4, 4, 4, 5, 5, 5, 4, 5, 4, 5, 4, 3]) },
-  { id: "martial-arts", zh: "武术", en: "Martial Arts", cat: "对抗", icon: '<circle cx="12" cy="5" r="2"/><path d="M12 7v4l-4 3 4 1-4 4M12 11l4 3-4 1 4 4"/>', demand: demand12([4, 4, 4, 5, 5, 5, 4, 5, 5, 5, 5, 3]) },
-  { id: "bjj", zh: "巴西柔术", en: "Brazilian Jiu-Jitsu", cat: "对抗", icon: '<circle cx="12" cy="5" r="2"/><path d="M12 7c0 3-4 4-6 9M12 7c0 3 4 4 6 9M12 10c-3 1-5 3-6 6M12 10c3 1 5 3 6 6"/>', demand: demand12([5, 5, 5, 4, 3, 4, 4, 5, 5, 5, 5, 5]) },
+  { id: "boxing", zh: "拳击", en: "Boxing", cat: "对抗", demand: demand12([4, 4, 4, 5, 5, 5, 4, 5, 4, 5, 4, 3]) },
+  { id: "martial-arts", zh: "武术", en: "Martial Arts", cat: "对抗", demand: demand12([4, 4, 4, 5, 5, 5, 4, 5, 5, 5, 5, 3]) },
+  { id: "bjj", zh: "巴西柔术", en: "Brazilian Jiu-Jitsu", cat: "对抗", demand: demand12([5, 5, 5, 4, 3, 4, 4, 5, 5, 5, 5, 5]) },
   // 技巧（4）
-  { id: "dancing", zh: "跳舞", en: "Dancing", cat: "技巧", icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6c3 2 4 7 1 11M12 6l-4 4M12 17c2 0 4 2 5 4M12 17l-4 1"/>', demand: demand12([2, 3, 3, 4, 4, 4, 3, 3, 5, 5, 5, 1]) },
-  { id: "roller-skating", zh: "轮滑", en: "Roller Skating", cat: "技巧", icon: '<circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/><path d="M7 18l4-5 6 0 1 2"/>', demand: demand12([3, 4, 4, 4, 5, 5, 4, 3, 5, 5, 4, 1]) },
-  { id: "skateboarding", zh: "滑板", en: "Skateboarding", cat: "技巧", icon: '<path d="M4 15l10-5 6 2-3 4-10 5z"/>', demand: demand12([3, 4, 3, 4, 4, 5, 3, 3, 5, 5, 4, 1]) },
-  { id: "parkour", zh: "跑酷", en: "Parkour", cat: "技巧", icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v5l-5 2M12 11l5 2-3 6"/>', demand: demand12([4, 5, 4, 5, 5, 5, 3, 4, 5, 5, 5, 2]) },
+  { id: "dancing", zh: "跳舞", en: "Dancing", cat: "技巧", demand: demand12([2, 3, 3, 4, 4, 4, 3, 3, 5, 5, 5, 1]) },
+  { id: "roller-skating", zh: "轮滑", en: "Roller Skating", cat: "技巧", demand: demand12([3, 4, 4, 4, 5, 5, 4, 3, 5, 5, 4, 1]) },
+  { id: "skateboarding", zh: "滑板", en: "Skateboarding", cat: "技巧", demand: demand12([3, 4, 3, 4, 4, 5, 3, 3, 5, 5, 4, 1]) },
+  { id: "parkour", zh: "跑酷", en: "Parkour", cat: "技巧", demand: demand12([4, 5, 4, 5, 5, 5, 3, 4, 5, 5, 5, 2]) },
 ];
+
+// —— 平均主义（v2.1 伪运动）：demand = 全部真实运动各能力需求逐列算术均值（1 位小数，随目录自动重算）——
+export const balancedSport: Sport = (() => {
+  const demand: Record<string, number> = {};
+  for (const a of abilities) {
+    const sum = sports.reduce((acc, s) => acc + (s.demand[a.code] ?? 0), 0);
+    demand[a.code] = Math.round((sum / sports.length) * 10) / 10;
+  }
+  return { id: "balanced", zh: "平均主义", en: "Balanced", cat: "平均主义", demand };
+})();
 
 // 动作库（v1.15 扩编：64 条，每能力至少 3 个候选；cover = 0–5 分制刺激当量）
 // 字段与量级约定见 LLD 附录 E.4 / §8.2。
@@ -208,8 +218,12 @@ export function ability(code: string): Ability {
 export function layer(key: string): Layer {
   return layers.find((l) => l.key === key)!;
 }
+// v2.1：lookup 含「平均主义」伪运动（sports 数组本身仍只含 35 条真实运动）
+const _sportById = new Map<string, Sport>();
+sports.forEach((s) => _sportById.set(s.id, s));
+_sportById.set(balancedSport.id, balancedSport);
 export function sport(id: string): Sport {
-  return sports.find((s) => s.id === id)!;
+  return _sportById.get(id)!;
 }
 
 // —— 动作库查询 / 分类标签（分类 code → 界面展示名）——

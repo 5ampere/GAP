@@ -13,7 +13,6 @@ export default function Footer() {
             <h4>{t("footer.product")}</h4>
             <Link href="/">{t("nav.home")}</Link>
             <Link href="/app/onboarding">{t("nav.start")}</Link>
-            <Link href="/app/training">{t("nav.training")}</Link>
           </div>
           <div className="footer-col">
             <h4>{t("footer.knowledge")}</h4>

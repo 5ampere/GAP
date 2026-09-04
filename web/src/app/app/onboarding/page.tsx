@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
-import { abilities, layers, saq, sports } from "@/lib/data";
+import { abilities, layers, saq, sports, balancedSport } from "@/lib/data";
 import { generatePlan } from "@/lib/engine";
 import { store } from "@/lib/store";
 import type { AssessmentMode, SportGoal, SportWeight, UserConstraints, UserData } from "@/lib/types";
@@ -11,7 +11,9 @@ import type { AssessmentMode, SportGoal, SportWeight, UserConstraints, UserData 
 const TITLES = ["ob.step2", "ob.step3", "ob.step4", "ob.step5", "ob.step6"];
 const SUBS = ["ob.step2.sub", "ob.step3.sub", "ob.step4.sub", "ob.step5.sub", "ob.step6.sub"];
 
-const CAT_ORDER = ["球类", "水上", "雪上", "攀岩", "体能", "户外", "对抗", "技巧"];
+// v2.1：平均主义置首（伪运动，单卡单独处理）；其余为真实运动类别
+const CAT_ORDER = ["平均主义", "球类", "水上", "雪上", "攀岩", "体能", "户外", "对抗", "技巧"];
+const MAX_REAL_SPORTS = 6;
 
 interface WizardState {
   step: number;
@@ -99,7 +101,7 @@ function mapSpt(spt: Record<string, string>): Record<string, number> {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { t, L } = useI18n();
+  const { t, L, lang } = useI18n();
   const [state, setState] = useState<WizardState>(INITIAL);
   const [generating, setGenerating] = useState(false);
   const [genStep, setGenStep] = useState(0);
@@ -107,21 +109,33 @@ export default function OnboardingPage() {
   const patch = (p: Partial<WizardState>) => setState((s) => ({ ...s, ...p }));
   const patchConstraints = (p: Partial<UserConstraints>) => setState((s) => ({ ...s, constraints: { ...s.constraints, ...p } }));
 
+  // v2.1：平均主义只能单独选——选中即清空真实运动；点真实运动会先移除平均主义
   const toggleSport = (id: string) => {
     setState((s) => {
-      const i = s.sports.findIndex((x) => x.id === id);
-      if (i >= 0) return { ...s, sports: s.sports.filter((x) => x.id !== id) };
-      if (s.sports.length >= 6) return s;
-      return { ...s, sports: [...s.sports, { id, weight: "medium" as SportWeight }] };
+      if (id === "balanced") {
+        const on = s.sports.some((x) => x.id === "balanced");
+        return on ? { ...s, sports: [] } : { ...s, sports: [{ id: "balanced", weight: "medium" as SportWeight }] };
+      }
+      const real = s.sports.filter((x) => x.id !== "balanced");
+      const i = real.findIndex((x) => x.id === id);
+      if (i >= 0) return { ...s, sports: real.filter((x) => x.id !== id) };
+      if (real.length >= MAX_REAL_SPORTS) return s;
+      return { ...s, sports: [...real, { id, weight: "medium" as SportWeight }] };
     });
   };
   const patchSport = (id: string, p: Partial<SportGoal>) => {
     setState((s) => ({ ...s, sports: s.sports.map((x) => (x.id === id ? { ...x, ...p } : x)) }));
   };
+  const cardKey = (fn: () => void) => (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      fn();
+    }
+  };
 
   const next = () => {
-    if (state.step === 1 && state.sports.length < 2) {
-      alert(L("请至少选择 2 项目标运动。", "Please choose at least 2 goal sports."));
+    if (state.step === 1 && state.sports.length < 1) {
+      alert(L("请至少选择 1 项目标运动。", "Please choose at least 1 goal sport."));
       return;
     }
     if (state.step < 5) {
@@ -163,49 +177,97 @@ export default function OnboardingPage() {
 
   const genStatuses = [L("正在评估能力缺口…", "Assessing gaps…"), L("匹配训练方法…", "Matching methods…"), L("编排每日目标…", "Setting daily targets…")];
 
-  const sportGroups = CAT_ORDER
-    .map((cat) => ({ cat, items: sports.filter((s) => s.cat === cat) }))
-    .filter((g) => g.items.length > 0);
-
   const renderStep = () => {
     switch (state.step) {
-      case 1:
+      case 1: {
+        const balOn = state.sports.some((x) => x.id === "balanced");
+        const realSel = state.sports.filter((x) => x.id !== "balanced");
+        const realCount = balOn ? 1 : realSel.length;
+        const full = !balOn && realCount >= MAX_REAL_SPORTS;
+        const realGroups = CAT_ORDER
+          .filter((cat) => cat !== "平均主义")
+          .map((cat) => ({ cat, items: sports.filter((s) => s.cat === cat) }))
+          .filter((g) => g.items.length > 0);
+        const WEIGHTS = [
+          { v: "low", zh: "低", en: "Low" },
+          { v: "medium", zh: "中", en: "Med" },
+          { v: "high", zh: "高", en: "High" },
+        ];
         return (
           <>
             <div className="micro" style={{ marginBottom: 12 }}>
-              {L(`已选 ${state.sports.length} / 6 项`, `Selected ${state.sports.length} / 6`)}
+              {L(`已选 ${realCount} 项`, `Selected ${realCount}`)}
             </div>
-            {sportGroups.map((g) => (
-              <div key={g.cat} style={{ marginBottom: 16 }}>
-                <div className="micro" style={{ marginBottom: 6, fontWeight: 600 }}>{g.cat}</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  {g.items.map((s) => {
-                    const sp = state.sports.find((x) => x.id === s.id);
-                    const on = !!sp;
-                    return (
-                      <div key={s.id} onClick={() => toggleSport(s.id)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "10px 14px", border: "1px solid var(--separator)", borderRadius: "var(--radius-sm)", cursor: "pointer", background: on ? "var(--accent-faint)" : "transparent" }}>
-                        <span style={{ flex: 1 }}>{L(s.zh, s.en)}</span>
-                        {on && (
-                          <div onClick={(e) => e.stopPropagation()}>
-                            <Segmented
-                              options={[
-                                { v: "low", zh: "低", en: "Low" },
-                                { v: "medium", zh: "中", en: "Med" },
-                                { v: "high", zh: "高", en: "High" },
-                              ]}
-                              value={sp.weight}
-                              onChange={(v) => patchSport(s.id, { weight: v as SportWeight })}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+
+            {/* 平均主义：置首 · 单卡 · 只能单独选 */}
+            <div className="sport-group" style={{ marginBottom: 20 }}>
+              <div className="micro" style={{ marginBottom: 6, fontWeight: 600 }}>{L("平均主义", "Balanced")}</div>
+              <div className="sport-grid">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={balOn}
+                  className={"sport-card sport-card--balanced" + (balOn ? " is-selected" : "")}
+                  onClick={() => toggleSport("balanced")}
+                  onKeyDown={cardKey(() => toggleSport("balanced"))}
+                >
+                  <span className="sport-name">{L(balancedSport.zh, balancedSport.en)}</span>
+                  <span className="sport-cat">{L("全部运动的平均需求", "Average demand across all sports")}</span>
+                  <span className="check">✓</span>
                 </div>
               </div>
-            ))}
+              <p className="micro" style={{ marginTop: 8, color: balOn ? "var(--text-secondary)" : "var(--text-tertiary)" }}>
+                {balOn
+                  ? L("已选平均主义：将按全部运动的平均水平定制。取消此项即可手动挑选。", "Balanced selected — your plan follows the average of all sports. Deselect to hand-pick.")
+                  : L("适合不想逐项挑选运动的你。", "For when you'd rather not hand-pick sports.")}
+              </p>
+            </div>
+
+            {!balOn && (
+              <>
+                {realGroups.map((g) => (
+                  <div key={g.cat} className="sport-group" style={{ marginBottom: 20 }}>
+                    <div className="micro" style={{ marginBottom: 6, fontWeight: 600 }}>{g.cat}</div>
+                    <div className="sport-grid">
+                      {g.items.map((s) => {
+                        const sp = realSel.find((x) => x.id === s.id);
+                        const on = !!sp;
+                        const blocked = full && !on;
+                        return (
+                          <div
+                            key={s.id}
+                            role="button"
+                            tabIndex={blocked ? -1 : 0}
+                            aria-pressed={on}
+                            aria-disabled={blocked}
+                            className={"sport-card" + (on ? " is-selected" : "") + (blocked ? " is-disabled" : "")}
+                            onClick={() => toggleSport(s.id)}
+                            onKeyDown={cardKey(() => toggleSport(s.id))}
+                          >
+                            <span className="sport-name">{L(s.zh, s.en)}</span>
+                            <span className="sport-cat">{lang === "en" ? s.zh : s.en}</span>
+                            <span className="check">✓</span>
+                            {on && (
+                              <div className="sport-card-seg" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                                <Segmented options={WEIGHTS} value={sp.weight} onChange={(v) => patchSport(s.id, { weight: v as SportWeight })} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+                {full && (
+                  <p className="micro" style={{ marginTop: 4, color: "var(--text-tertiary)" }}>
+                    {L("已达 6 项上限：先取消某项再更换。", "Max 6 reached — remove one before adding another.")}
+                  </p>
+                )}
+              </>
+            )}
           </>
         );
+      }
 
       case 2:
         return (
@@ -300,7 +362,7 @@ export default function OnboardingPage() {
 
   function renderSummary() {
     const sportNames = state.sports.map((sp) => {
-      const s = sports.find((x) => x.id === sp.id)!;
+      const s = sp.id === "balanced" ? balancedSport : sports.find((x) => x.id === sp.id)!;
       return L(s.zh, s.en);
     }).join(" · ");
     const modeLabel = state.mode === "spt" ? t("mode.spt") : t("mode.saq");

@@ -25,7 +25,6 @@ export interface Sport {
   zh: string;
   en: string;
   cat: string;
-  icon: string;
   demand: Record<string, number>;
 }
 

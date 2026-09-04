@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { abilities, layers, sports } from "@/lib/data";
 import RadarChart from "@/components/RadarChart";
-import SportIcon from "@/components/SportIcon";
 import Reveal from "@/components/Reveal";
 
 const STEPS = [
@@ -53,12 +52,12 @@ export default function LandingPage() {
           <h1 className="hero-title">{t("hero.title")}</h1>
           <p className="hero-sub">{t("hero.subtitle")}</p>
           <div className="hero-cta">
-            <Link className="btn btn-primary btn-lg" href="/app/onboarding">
-              {t("hero.cta")}
-            </Link>
             <a className="btn btn-secondary btn-lg" href="#what">
               {t("hero.cta2")}
             </a>
+            <Link className="btn btn-primary btn-lg" href="/app/onboarding">
+              {t("hero.cta")}
+            </Link>
           </div>
         </div>
         <div className="hero-scroll-hint">{t("hero.scrollHint")}</div>
@@ -156,7 +155,6 @@ export default function LandingPage() {
               const on = selectedSports.includes(s.id);
               return (
                 <button key={s.id} className={"chip" + (on ? " is-active" : "")} type="button" onClick={() => toggleSport(s.id)}>
-                  <SportIcon inner={s.icon} />
                   {L(s.zh, s.en)}
                 </button>
               );
