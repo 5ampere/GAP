@@ -9,24 +9,25 @@ export const layers: Layer[] = [
 ];
 
 export const abilities: Ability[] = [
-  { code: "STR_MAX", zh: "最大力量", en: "Maximal Strength", layer: "L1", def: "单次或极低次数的高力输出能力。" },
-  { code: "STR_REL", zh: "相对力量", en: "Relative Strength", layer: "L1", def: "单位体重的力量能力，自重运动与攀爬的基础。" },
-  { code: "STR_END", zh: "力量耐力", en: "Strength Endurance", layer: "L1", def: "重复/持续输出力量的能力。" },
-  { code: "GRIP_CORE", zh: "握力与躯干传力", en: "Grip & Core", layer: "L1", def: "抓握、悬挂以及下肢到上肢的力量传递。" },
-  { code: "PWR", zh: "爆发力", en: "Power", layer: "L1", def: "短时间内产生较大机械功率/冲量的能力。" },
-  { code: "SPD", zh: "速度", en: "Speed", layer: "L2", def: "快速完成肢体或身体位移的能力。" },
-  { code: "ACC", zh: "加速", en: "Acceleration", layer: "L2", def: "从低速快速建立速度的能力。" },
-  { code: "DEC_COD", zh: "减速与变向", en: "Deceleration & COD", layer: "L2", def: "吸收动量、制动、改变方向并再加速。" },
-  { code: "AER_CAP", zh: "有氧能力", en: "Aerobic Capacity", layer: "L1", def: "持续有氧能量供给能力。" },
-  { code: "AER_END", zh: "有氧耐力", en: "Aerobic Endurance", layer: "L1", def: "较长时间维持次最大输出的能力。" },
-  { code: "ANA_CAP", zh: "无氧能力", en: "Anaerobic Capacity", layer: "L1", def: "短时间高强度能量输出能力。" },
-  { code: "RHIA", zh: "重复高强度能力", en: "Repeat High-Intensity Ability", layer: "L1", def: "高强度输出与恢复并重复的能力。" },
-  { code: "BAL", zh: "平衡", en: "Balance", layer: "L2", def: "维持和恢复身体重心控制的能力。" },
-  { code: "COORD", zh: "协调", en: "Coordination", layer: "L2", def: "多身体部位在时间、空间、力量上的协同。" },
-  { code: "REACT", zh: "感知-反应", en: "Reaction", layer: "L3", def: "对外部刺激快速选择并执行动作。" },
-  { code: "AWARE", zh: "身体空间觉", en: "Body Awareness", layer: "L3", def: "本体感觉、身体位置和空间关系感知。" },
-  { code: "MOB", zh: "活动度", en: "Mobility", layer: "L2", def: "可用且可主动控制的关节运动范围。" },
-  { code: "STAB", zh: "稳定性", en: "Stability", layer: "L2", def: "动态任务中控制关节/躯干位置的能力。" },
+  // conflicts（v2.2）：对称相斥，仅能量系统 4 条非空——有氧系 {AER_CAP,AER_END} × 无氧系 {ANA_CAP,RHIA}
+  { code: "STR_MAX", zh: "最大力量", en: "Maximal Strength", layer: "L1", def: "单次或极低次数的高力输出能力。", conflicts: [] },
+  { code: "STR_REL", zh: "相对力量", en: "Relative Strength", layer: "L1", def: "单位体重的力量能力，自重运动与攀爬的基础。", conflicts: [] },
+  { code: "STR_END", zh: "力量耐力", en: "Strength Endurance", layer: "L1", def: "重复/持续输出力量的能力。", conflicts: [] },
+  { code: "GRIP_CORE", zh: "握力与躯干传力", en: "Grip & Core", layer: "L1", def: "抓握、悬挂以及下肢到上肢的力量传递。", conflicts: [] },
+  { code: "PWR", zh: "爆发力", en: "Power", layer: "L1", def: "短时间内产生较大机械功率/冲量的能力。", conflicts: [] },
+  { code: "SPD", zh: "速度", en: "Speed", layer: "L2", def: "快速完成肢体或身体位移的能力。", conflicts: [] },
+  { code: "ACC", zh: "加速", en: "Acceleration", layer: "L2", def: "从低速快速建立速度的能力。", conflicts: [] },
+  { code: "DEC_COD", zh: "减速与变向", en: "Deceleration & COD", layer: "L2", def: "吸收动量、制动、改变方向并再加速。", conflicts: [] },
+  { code: "AER_CAP", zh: "有氧能力", en: "Aerobic Capacity", layer: "L1", def: "持续有氧能量供给能力。", conflicts: ["ANA_CAP", "RHIA"] },
+  { code: "AER_END", zh: "有氧耐力", en: "Aerobic Endurance", layer: "L1", def: "较长时间维持次最大输出的能力。", conflicts: ["ANA_CAP", "RHIA"] },
+  { code: "ANA_CAP", zh: "无氧能力", en: "Anaerobic Capacity", layer: "L1", def: "短时间高强度能量输出能力。", conflicts: ["AER_CAP", "AER_END"] },
+  { code: "RHIA", zh: "重复高强度能力", en: "Repeat High-Intensity Ability", layer: "L1", def: "高强度输出与恢复并重复的能力。", conflicts: ["AER_CAP", "AER_END"] },
+  { code: "BAL", zh: "平衡", en: "Balance", layer: "L2", def: "维持和恢复身体重心控制的能力。", conflicts: [] },
+  { code: "COORD", zh: "协调", en: "Coordination", layer: "L2", def: "多身体部位在时间、空间、力量上的协同。", conflicts: [] },
+  { code: "REACT", zh: "感知-反应", en: "Reaction", layer: "L3", def: "对外部刺激快速选择并执行动作。", conflicts: [] },
+  { code: "AWARE", zh: "身体空间觉", en: "Body Awareness", layer: "L3", def: "本体感觉、身体位置和空间关系感知。", conflicts: [] },
+  { code: "MOB", zh: "活动度", en: "Mobility", layer: "L2", def: "可用且可主动控制的关节运动范围。", conflicts: [] },
+  { code: "STAB", zh: "稳定性", en: "Stability", layer: "L2", def: "动态任务中控制关节/躯干位置的能力。", conflicts: [] },
 ];
 
 // 12 指标 → 18 能力需求向量（源自 HLD 附录 A 种子矩阵）

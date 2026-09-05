@@ -18,6 +18,9 @@ export interface Ability {
   en: string;
   layer: LayerKey;
   def: string;
+  // v2.2 相斥能力：与其互斥的能力 code 列表（对称关系，双方互为对方之一；无相斥为 []）。
+  // 口径见 LLD §4.2：最小能量系统集——有氧系 {AER_CAP, AER_END} × 无氧系 {ANA_CAP, RHIA}。
+  conflicts: string[];
 }
 
 export interface Sport {

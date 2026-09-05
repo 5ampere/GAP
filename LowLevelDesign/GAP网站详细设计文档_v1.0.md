@@ -4,9 +4,9 @@ General Athletic Preparation Recommendation System — Web Frontend Detailed Des
 
 面向多运动爱好者的通用运动能力评估、能力缺口分析与训练计划生成系统 · **前端与交互详细设计**
 
-版本：v2.1（v2.0 As-Built 基线之上的变更版，代码尚未落地）
+版本：v2.2（v2.1 As-Built 基线之上的变更版，代码尚未落地）
 状态：变更待实现（经审阅确认后按文执行）
-日期：2026-09-04
+日期：2026-09-05
 上游依赖：[GAP系统设计文档_v1.0.md](../HighLevelDesign/GAP系统设计文档_v1.0.md)
 
 ---
@@ -15,7 +15,7 @@ General Athletic Preparation Recommendation System — Web Frontend Detailed Des
 
 | **项目**   | **内容**                                                                                                                   |
 |------------|----------------------------------------------------------------------------------------------------------------------------|
-| 文档定位   | 网站前端与交互的详细设计（LLD）。**本版 v2.1**：以 v2.0（仓库中「当前已实现并可通过 `npm run build` 构建的网站」）为基线，追加 6 项界面/数据变更（见 §6 对应小节与附录 E），凡与既往版本冲突之处一律以本文为准。 |
+| 文档定位   | 网站前端与交互的详细设计（LLD）。**本版 v2.2**：以 v2.1（已按文落地，commit `3e20ea1`，2026-09-04 部署）为 As-Built 基线，追加 1 项引擎变更——**每日能力排日算法优化 + 能力相斥关系**（§4.1/§4.2 能力数据、§5.6/§5.8 引擎、附录 C.2 / E），凡与既往版本冲突之处一律以本文为准。 |
 | 技术栈     | React 19 / Next.js（App Router，静态预渲染）/ TypeScript；CSS 变量驱动的设计令牌（Design Tokens）；CSS 存放于 `web/src/app/*.css`。 |
 | 界面语言   | 中英双语（zh-CN 默认 / en-US 可切换）；能力代码（PWR、STR_MAX…）仅存在于数据层，UI 一律展示能力全称。                        |
 | 内容结构   | 同一站点 3 个导航入口：欢迎 `/`、定制计划 `/app/onboarding`、了解GAP `/docs`（v2.1 移除「我的能力」；不做用户注册与数据留存）。                    |
@@ -261,7 +261,7 @@ GAP Web
 | `SportLevel` | `"recreational" \| "intermediate" \| "competitive"` | 已定义未使用（预留） |
 | `AssessmentMode` | `"saq" \| "spt"` | 自评 / 专业自测 |
 | `Layer` | `key, zh, en, cssVar, abilities: string[]` | `cssVar`=`--layer-l1/l2/l3` |
-| `Ability` | `code, zh, en, layer, def` | code=稳定主键（见 附录 D） |
+| `Ability` | `code, zh, en, layer, def, conflicts: string[]` | code=稳定主键（附录 D）；`conflicts`=相斥能力 code 列表（v2.2，对称，仅能量系统 4 条非空，见 4.2） |
 | `Sport` | `id, zh, en, cat, demand` | `demand`=18 能力需求（v2.1 起移除 `icon` 字段） |
 | `Exercise` | `id, zh, en, category, cover, primary, equipment[], setsMin, setsMax, reps, rpe, minutes, cue, regression` | cover=刺激向量，见 4.5 |
 | `SaqQuestion` | `code, zh, en, a0, a5` | a0/a5=滑块两端锚点文案 |
@@ -284,34 +284,36 @@ GAP Web
 能力全表的轴序 / 雷达顺序 / 分组内顺序一律取 `abilities` 数组序；分层展示（能力树、SAQ/SPT 分层列表）= 按层过滤，组内保持数组序。下方各层表即按实际展示顺序排列（L1→L2→L3）。
 
 **L1 体能基础 / Physical Capacity（9）**
-| code | 中文 | English | def |
-|---|---|---|---|
-| STR_MAX | 最大力量 | Maximal Strength | 单次或极低次数的高力输出能力。 |
-| STR_REL | 相对力量 | Relative Strength | 单位体重的力量能力，自重运动与攀爬的基础。 |
-| STR_END | 力量耐力 | Strength Endurance | 重复/持续输出力量的能力。 |
-| GRIP_CORE | 握力与躯干传力 | Grip & Core | 抓握、悬挂以及下肢到上肢的力量传递。 |
-| PWR | 爆发力 | Power | 短时间内产生较大机械功率/冲量的能力。 |
-| AER_CAP | 有氧能力 | Aerobic Capacity | 持续有氧能量供给能力。 |
-| AER_END | 有氧耐力 | Aerobic Endurance | 较长时间维持次最大输出的能力。 |
-| ANA_CAP | 无氧能力 | Anaerobic Capacity | 短时间高强度能量输出能力。 |
-| RHIA | 重复高强度能力 | Repeat High-Intensity Ability | 高强度输出与恢复并重复的能力。 |
+| code | 中文 | English | 相斥（v2.2） | def |
+|---|---|---|---|---|
+| STR_MAX | 最大力量 | Maximal Strength | — | 单次或极低次数的高力输出能力。 |
+| STR_REL | 相对力量 | Relative Strength | — | 单位体重的力量能力，自重运动与攀爬的基础。 |
+| STR_END | 力量耐力 | Strength Endurance | — | 重复/持续输出力量的能力。 |
+| GRIP_CORE | 握力与躯干传力 | Grip & Core | — | 抓握、悬挂以及下肢到上肢的力量传递。 |
+| PWR | 爆发力 | Power | — | 短时间内产生较大机械功率/冲量的能力。 |
+| AER_CAP | 有氧能力 | Aerobic Capacity | ANA_CAP · RHIA | 持续有氧能量供给能力。 |
+| AER_END | 有氧耐力 | Aerobic Endurance | ANA_CAP · RHIA | 较长时间维持次最大输出的能力。 |
+| ANA_CAP | 无氧能力 | Anaerobic Capacity | AER_CAP · AER_END | 短时间高强度能量输出能力。 |
+| RHIA | 重复高强度能力 | Repeat High-Intensity Ability | AER_CAP · AER_END | 高强度输出与恢复并重复的能力。 |
 
 **L2 动作能力 / Movement Capacity（7）**
-| code | 中文 | English | def |
-|---|---|---|---|
-| SPD | 速度 | Speed | 快速完成肢体或身体位移的能力。 |
-| ACC | 加速 | Acceleration | 从低速快速建立速度的能力。 |
-| DEC_COD | 减速与变向 | Deceleration & COD | 吸收动量、制动、改变方向并再加速。 |
-| BAL | 平衡 | Balance | 维持和恢复身体重心控制的能力。 |
-| COORD | 协调 | Coordination | 多身体部位在时间、空间、力量上的协同。 |
-| MOB | 活动度 | Mobility | 可用且可主动控制的关节运动范围。 |
-| STAB | 稳定性 | Stability | 动态任务中控制关节/躯干位置的能力。 |
+| code | 中文 | English | 相斥（v2.2） | def |
+|---|---|---|---|---|
+| SPD | 速度 | Speed | — | 快速完成肢体或身体位移的能力。 |
+| ACC | 加速 | Acceleration | — | 从低速快速建立速度的能力。 |
+| DEC_COD | 减速与变向 | Deceleration & COD | — | 吸收动量、制动、改变方向并再加速。 |
+| BAL | 平衡 | Balance | — | 维持和恢复身体重心控制的能力。 |
+| COORD | 协调 | Coordination | — | 多身体部位在时间、空间、力量上的协同。 |
+| MOB | 活动度 | Mobility | — | 可用且可主动控制的关节运动范围。 |
+| STAB | 稳定性 | Stability | — | 动态任务中控制关节/躯干位置的能力。 |
 
 **L3 感知与适应 / Perception & Adaptation（2）**
-| code | 中文 | English | def |
-|---|---|---|---|
-| REACT | 感知-反应 | Reaction | 对外部刺激快速选择并执行动作。 |
-| AWARE | 身体空间觉 | Body Awareness | 本体感觉、身体位置和空间关系感知。 |
+| code | 中文 | English | 相斥（v2.2） | def |
+|---|---|---|---|---|
+| REACT | 感知-反应 | Reaction | — | 对外部刺激快速选择并执行动作。 |
+| AWARE | 身体空间觉 | Body Awareness | — | 本体感觉、身体位置和空间关系感知。 |
+
+**相斥关系语义（v2.2）**：同列 `·` 分隔的 code 与该能力**互斥**（对称关系，如 AER_CAP ↔ ANA_CAP：有氧+无氧同日作主目标压力过大）。口径取**最小能量系统集**：`有氧系 {AER_CAP, AER_END} × 无氧系 {ANA_CAP, RHIA}` 两两互斥，共 4 对；MOB（活动度）/ AWARE（身体空间觉）/ BAL / COORD 等无相斥（`—`）。数据层 `Ability.conflicts` 存对方 code 列表，与上表双向一致。引擎排日用法见 §5.8。
 
 **三层配色（token）**：L1 `var(--layer-l1)` `#FF3B30` · L2 `--layer-l2` `#34C759` · L3 `--layer-l3` `#0A84FF`；雷达轴标签、能力树/自测分组圆点、移动端能力条按层取色。
 
@@ -424,7 +426,7 @@ GAP Web
 
 ## 4.8 扩展不变式（数据类）
 
-1. **能力集合 = 各层 `Layer.abilities` 的并集（code 唯一、无遗漏），总数为 18**；新增能力需同步：abilities 全表、所属 Layer.abilities（自动入雷达/树/统计）、SAQ 与 SPT 各补一题、为其提供 ≥3 个可选动作（`cover` 含该能力）。
+1. **能力集合 = 各层 `Layer.abilities` 的并集（code 唯一、无遗漏），总数为 18**；新增能力需同步：abilities 全表、所属 Layer.abilities（自动入雷达/树/统计）、SAQ 与 SPT 各补一题、为其提供 ≥3 个可选动作（`cover` 含该能力）。新增能力默认 `conflicts:[]`；确需相斥时按 §4.2 口径**成对**维护、双向一致。
 2. **运动**：id 唯一 slug、cat 属于 CAT_ORDER（新增类别需同步列表；`balanced` 平均主义为伪运动，见 4.3.2，不入此规则）、demand 12 种子每值 1–5（平均主义例外：1 位小数的全量均值）；v2.1 起**无 icon 字段与图标资源**；每能力可无 demand 项（未选相关运动能力缺省目标 2.0）。
 3. **动作**：id 唯一、cover 值域 0–5 且主刺激能力显式入 cover、category ∈ 18 类（新增类别需同步 `categoryLabel`）、equipment ∈ EQUIPMENT、剂量字段齐全。
 4. **方法块**：能力 code 全覆盖 18 项，band 冲突（AER/ANA 同为 6）允许并列同带。
@@ -435,7 +437,7 @@ GAP Web
 
 # 5. 计划引擎与共享规则（`lib/engine.ts` · `components/plan/shared.ts`）
 
-> 现为**确定性 mock 引擎**（`algorithm_version:"0.2.1-mock"`），未来由后端版本化算法替换（接口以 generatePlan(UserData)→Plan 为界，见 附录 C.5 / §9）。全部数值保留 1 位小数 `round1`。
+> 现为**确定性 mock 引擎**（现行 `algorithm_version:"0.2.1-mock"`；v2.2 排日算法落地后启用 `"0.3.0-mock"`），未来由后端版本化算法替换（接口以 generatePlan(UserData)→Plan 为界，见 附录 C.5 / §9）。全部数值保留 1 位小数 `round1`。
 
 ## 5.1 重视度权值 `weightOf`
 
@@ -476,7 +478,7 @@ GAP Web
   3. 再反复给「剩余需补量最大且仍有候选」的能力补动作，至全达标或满 8 项（guard ≤ 24）；
   4. 兜底：不足 5 项且未满 8 时补一条 `primary==="MOB"` 的活动度动作；
   5. 最终按所属方法块 band 升序排序输出 id 数组（准备/热身块不参与挑选）。
-- **单日能力目标**：该日某能力频次 `f` 时，`δday = deficit/f`，`target_day = round1(min(5, current + δday))`，`baseline=current`。**对外三档优先级**（`shared.ts`，仪表盘/编排/总表统一口径，依据整体 `deficit`）：`high ≥1.0`（danger 红）· `mid ≥0.5`（warning 琥珀）· `low <0.5`（success 绿）；文本 高/中/低 · High/Mid/Low；chip 文案 `优先级 · 高` 等。
+- **单日能力目标**：能力以本轮**实际出现次数** `k`（≥1，含必要重复，见 §5.8）均摊缺口，`δday = deficit/k`，`target_day = round1(min(5, current + δday))`，`baseline=current`。**对外三档优先级**（`shared.ts`，仪表盘/编排/总表统一口径，依据整体 `deficit`）：`high ≥1.0`（danger 红）· `mid ≥0.5`（warning 琥珀）· `low <0.5`（success 绿）；文本 高/中/低 · High/Mid/Low；chip 文案 `优先级 · 高` 等。
 
 ## 5.7 编排共享（`shared.ts`）
 
@@ -488,10 +490,16 @@ GAP Web
 ## 5.8 生成编排 `generatePlan(user)` → `Plan`
 
 1. 计算 target / current / gaps（§5.2–5.3）。
-2. `N = clamp(daysPerWeek, 1, 7)`；频次 `freqOf(deficit)`：`N===1 → 1`；否则 `deficit ≥ 1.2 → min(2, N)`，`其余 → 1`。
+2. `N = clamp(daysPerWeek, 1, 7)`；基准频次 `freqOf(deficit)`：`N===1 → 1`；否则 `deficit ≥ 1.2 → min(2, N)`，`其余 → 1`（大缺口强度双频保留，见步骤 4）。
 3. 单日容量上限 `C = clamp(ceil(S/N)+1, 3, 6)`，`S = Σ freqOf`；上限不强制填满。
-4. 排日：逐缺口逐次放入「当前项数最少且不含该能力且 < C」的天；无可用日则该次暴露顺延（留作恢复与机动）。
-5. 每日目标能力按该能力 priority 降序呈现；计算主题（5.4）、时长（5.5）、推荐组合（5.6）、标签 `第 d+1 天 / Day d+1`。
+4. **排日（v2.2 两阶段）**。全阶段硬性可用条件 = 天未含该能力本身、未含与其**相斥**的能力（§4.2 相斥列）、未满容量 C。
+   - **阶段一 · 铺开**：按缺口能力 `priority` 降序，各放**第 1 次暴露**——在可用天中选「当前项数最少」者（并列取序号小）。使不同能力尽量各占一天、**跨日不重复**。
+   - **阶段二 · 必要重复**（跨日重复仅允许以下两类来源）：
+     a) **强度双频**：`deficit ≥ 1.2` 且 `N ≥ 2` 的能力补第 2 次（放入可用天中当前最少者；必要时与其他能力共日，仍受相斥/容量约束）。
+     b) **富余填空**：上述排完后仍存在空白训练日（占用天数 < N）时，按 `deficit` 降序（并列按 `priority` 降序）为能力追加暴露，**只放空白日**，直至 N 天均有 ≥1 目标能力，或候选能力达到上限 `ceil(N/A)`（A = 缺口能力数，天然 ≤3）。即「训练日太多、能力太少」时才扩散重复，且按均摊扩散、不使单项能力霸周。
+   - **不变量**：同一天同一能力 ≤1；无上述来源不重复（阶段一天与天之间自然互不重复）；任一能力一轮出现次数 ∈ 1…上限。
+   - **兜底降级**（极端情形，按确定性次序）：任何排位先满足「无相斥 + 未满 C」；可用天不足时放宽「相斥」→ 选「冲突数最少且项数最少」的天（仍守容量 C）；`N>1` 时若仍无可用位则该次暴露顺延（留作恢复与机动，**容量不再放宽、不超载堆叠**）；`N=1` 时一周仅一日须容纳全部能力，容量与相斥均无法回避，整体超载同日即走此兜底。
+5. 每日目标能力按该能力 priority 降序呈现；单日目标增量按该能力本轮实际出现次数均摊（§5.6）；计算主题（5.4）、时长（5.5）、推荐组合（5.6）、标签 `第 d+1 天 / Day d+1`。
 6. 生成专项提醒 `practice` 文案（含所选运动中文名顿号连接 / 英文逗号连接，无则回落「所选运动」）。
 7. 返回 Plan（`confirmedAt=null`；写库见 §3.1）。
 
@@ -663,7 +671,7 @@ GAP Web
 
 # 附录 C 数据扩展手册
 
-**C.1 新增运动**：在 `data.ts` `sports[]` 内补行（id/zh/en/cat/demand12(12 种子)；v2.1 起**无 icon 字段**），cat 若为新类别同步 `CAT_ORDER`（向导顺序；首位为「平均主义」伪运动段）。规则见 §4.8-2。向导运动卡自动出现；欢迎页 `#sports` chip 固定渲染 35 条真实运动（不含平均主义）；引擎聚合自动纳入；新增真实运动会令 `balanced` 均值自动重算（4.3.2）。**C.2 新增能力**：按 4.2 补全三层表 → 数据文件同步（abilities、所属 Layer.abilities、demand12 若改映射、SAQ 1 题、SPT_TESTS 1 条、覆盖该能力的动作 ≥3）。雷达/树/统计卡片分母自动更新。**C.3 新增动作**：示例——加入以 STR_MAX 为主刺激的 `E("...", "…", "…", "squat", 3, 4, "6-8", "7-8", 6, ["杠铃"], "要点…", "退阶…", "STR_MAX", [["STR_MAX", 0.5], ["STAB", 0.25]])`：**主刺激能力必须同时出现在 cover 元组**（否则不进入 STR_MAX 候选/推荐），category 须 ∈18 类（或同步 categoryLabel），equipment ∈ EQUIPMENT。**C.4 新增量表档位/锚点**：SPT ranges 升序二元组、SAQ a0/a5 文案改 data.ts 即生效；单位与 placeholder 同步。**C.5 接真实后端**：保持 `generatePlan(UserData): Plan` 契约与 `Plan` 结构（gap.plan 键位、`algorithm_version` 字段标识），后端实现后仅换 import 源，前端无改动。
+**C.1 新增运动**：在 `data.ts` `sports[]` 内补行（id/zh/en/cat/demand12(12 种子)；v2.1 起**无 icon 字段**），cat 若为新类别同步 `CAT_ORDER`（向导顺序；首位为「平均主义」伪运动段）。规则见 §4.8-2。向导运动卡自动出现；欢迎页 `#sports` chip 固定渲染 35 条真实运动（不含平均主义）；引擎聚合自动纳入；新增真实运动会令 `balanced` 均值自动重算（4.3.2）。**C.2 新增能力**：按 4.2 补全三层表（含新增「相斥」列）→ 数据文件同步（abilities 补 `conflicts`（默认 `[]`，需相斥则与对方成对、双向一致）、所属 Layer.abilities、demand12 若改映射、SAQ 1 题、SPT_TESTS 1 条、覆盖该能力的动作 ≥3）。雷达/树/统计卡片分母自动更新。**C.3 新增动作**：示例——加入以 STR_MAX 为主刺激的 `E("...", "…", "…", "squat", 3, 4, "6-8", "7-8", 6, ["杠铃"], "要点…", "退阶…", "STR_MAX", [["STR_MAX", 0.5], ["STAB", 0.25]])`：**主刺激能力必须同时出现在 cover 元组**（否则不进入 STR_MAX 候选/推荐），category 须 ∈18 类（或同步 categoryLabel），equipment ∈ EQUIPMENT。**C.4 新增量表档位/锚点**：SPT ranges 升序二元组、SAQ a0/a5 文案改 data.ts 即生效；单位与 placeholder 同步。**C.5 接真实后端**：保持 `generatePlan(UserData): Plan` 契约与 `Plan` 结构（gap.plan 键位、`algorithm_version` 字段标识），后端实现后仅换 import 源，前端无改动。
 
 # 附录 D 术语对照（能力 code ↔ 全称 ↔ English）
 
@@ -688,7 +696,8 @@ GAP Web
 |---|---|---|
 | v1.0–v1.19 | — | 历史迭代（落地页多次改版、动作库扩编 64、轮模型、去达成/达标、去精度、动态容量、动作单归属等）；阶段细节已并入本文各章节 |
 | **v2.0** | 2026-09-02 | **以当前网页为标准的整理版（As-Built）**：重建同文件；文档原则「代码/数据文件为唯一事实源」；正文重排为「页面规格 + 集中数据层」；删除全部未上线章节（评估成绩/日志/为什么/进步、完整文档站、后端 API 合同等）→ §9 单行路线图；数据层表全量入 §4 并附扩展不变式与附录 C；仓库外内容（剪影/粒子/旧 5 类分组）从规格中移除并标记死代码 |
-| **v2.1** | 2026-09-04 | **6 项变更（需求已确认；代码待「执行」后落地）**：① 移除「我的能力」界面 `/app/training`（删页面及导航/页脚入口，不做注册与复测留存；占位页仅余 /docs）；② 欢迎页 Hero CTA 左右对调——左次按钮 `了解 GAP`（hero.cta2 →`#what`）、右主按钮 `定制计划`（hero.cta →`/app/onboarding`）；③ 运动去图标——欢迎页共享能力 chips 纯文字，删 `SportIcon` 组件、`Sport.icon` 字段与全部 SVG 资源；④ 向导 Step 1 目标运动按类别改为致密卡片网格（`.sport-grid`/`.sport-card`，auto-fill minmax≈148px）；⑤ Step 1 最少选 1 项即可 + 新增「平均主义」伪运动（置首段、单卡、全量均值种子 ≈`[3.5,3.7,…]`、与真实运动互斥单选；§4.3.2）；⑥ 计划按钮 `查看完整计划`→`定制完整计划`（dash.viewPlan）。连带文案：ob.step2.sub、step.1.d 由「2–6 项」改「1–6 项」。 |
+| **v2.1** | 2026-09-04 | **6 项变更（需求已确认 → 已按文落地，commit `3e20ea1`，2026-09-04 部署）**：① 移除「我的能力」界面 `/app/training`（删页面及导航/页脚入口，不做注册与复测留存；占位页仅余 /docs）；② 欢迎页 Hero CTA 左右对调——左次按钮 `了解 GAP`（hero.cta2 →`#what`）、右主按钮 `定制计划`（hero.cta →`/app/onboarding`）；③ 运动去图标——欢迎页共享能力 chips 纯文字，删 `SportIcon` 组件、`Sport.icon` 字段与全部 SVG 资源；④ 向导 Step 1 目标运动按类别改为致密卡片网格（`.sport-grid`/`.sport-card`，auto-fill minmax≈148px）；⑤ Step 1 最少选 1 项即可 + 新增「平均主义」伪运动（置首段、单卡、全量均值种子 ≈`[3.5,3.7,…]`、与真实运动互斥单选；§4.3.2）；⑥ 计划按钮 `查看完整计划`→`定制完整计划`（dash.viewPlan）。连带文案：ob.step2.sub、step.1.d 由「2–6 项」改「1–6 项」。 |
+| **v2.2** | 2026-09-05 | **1 项引擎优化（需求已确认；代码待「执行」后落地）**：① 能力表新增**相斥关系**（§4.2「相斥」列 + §4.1 `Ability.conflicts`）：最小能量系统口径——`有氧系 {AER_CAP, AER_END} × 无氧系 {ANA_CAP, RHIA}` 两两互斥共 4 对，MOB/AWARE 等无相斥；同一训练日目标列表不得并存互斥对。② 每日能力排日改为**「铺开 + 必要重复」两阶段**（§5.8）：阶段一各缺口能力第 1 次暴露尽量各占不同天、跨日不重复；阶段二仅两类必要重复——a) 大缺口 `deficit ≥ 1.2` 强度双频保留，b) 训练日富余（占用天数 < N）时按需填空、上限 `⌈N/A⌉≤3`；配兜底降级（先放宽相斥（仍守容量）→ 满位即顺延，容量不超载；仅 `N=1` 单日整体超载兜底）。单日目标增量按该能力本轮实际出现次数均摊（§5.6）。算法版本 `0.2.1-mock` → `0.3.0-mock`。 |
 
 > 文档维护规则见「版本原则与文档维护」。本文件与 `web/src` 对不上即为待办：先改页面或数据，再升版本号并回填本表。
 

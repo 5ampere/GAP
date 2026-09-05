@@ -254,27 +254,79 @@ export function generatePlan(user: UserData): Plan {
   const N = Math.max(1, Math.min(7, user.constraints?.daysPerWeek ?? 4));
   const dayCodes: string[][] = Array.from({ length: N }, () => []);
 
-  // 6.4.5 步骤 2–3：频次 f；单日容量 C 动态（v1.18，不再固定 4）。
-  // S = 本轮暴露总次数 Σ f[a]；C = clamp(ceil(S/N)+1, 3, 6)——缺口多/训练日少 → 单日 5–6 个，
-  // 缺口少/训练日多 → 单日 2–3 个，放不下的暴露整日留作「恢复与机动」。C 是上限，不强行填满。
+  // v2.2 排日：两阶段「铺开 + 必要重复」+ 相斥约束（LLD §4.2 / §5.8）。
+  // 基准频次 freqOf（大缺口 deficit≥1.2 强度双频保留）；单日容量 C 动态（v1.18），是软性上限不强制填满。
   const freqOf = (deficit: number) => (N === 1 ? 1 : deficit >= 1.2 ? Math.min(2, N) : 1);
   const S = gaps.reduce((sum, g) => sum + freqOf(g.deficit), 0);
   const C = Math.max(3, Math.min(6, Math.ceil(S / N) + 1));
-  for (const g of gaps) {
-    const f = freqOf(g.deficit);
-    for (let i = 0; i < f; i++) {
+  const A = gaps.length;
+  const occ: Record<string, number> = {}; // 每能力本轮已安排次数
+  const inc = (code: string) => {
+    occ[code] = (occ[code] ?? 0) + 1;
+  };
+  const conflictsBy = new Map<string, Set<string>>();
+  abilities.forEach((ab) => conflictsBy.set(ab.code, new Set(ab.conflicts)));
+  const conflictsOf = (code: string, inDay: string[]) => {
+    const cf = conflictsBy.get(code);
+    if (!cf || cf.size === 0) return 0;
+    let n = 0;
+    for (const c of inDay) if (cf.has(c)) n++;
+    return n;
+  };
+  // 候选天分层查找（确定性）：严格（无相斥、未满 C）→ 放宽相斥（仍守容量 C）→ 仍无则 -1（该次暴露顺延）。
+  // allowOverflow 仅 N=1 单日全堆时开启（容量无论如何装不下，相斥亦无法回避）。
+  const pickDay = (code: string, mustEmpty: boolean, allowOverflow: boolean): number => {
+    const modes = allowOverflow ? [0, 1, 2] : [0, 1];
+    for (const mode of modes) {
       let best = -1;
       let bestCount = Infinity;
+      let bestConflict = Infinity;
       for (let d = 0; d < N; d++) {
-        if (dayCodes[d].indexOf(g.code) >= 0 || dayCodes[d].length >= C) continue;
-        if (dayCodes[d].length < bestCount) {
-          bestCount = dayCodes[d].length;
+        const day = dayCodes[d];
+        if (day.indexOf(code) >= 0) continue; // 同天同一能力 ≤1（任何模式均禁）
+        if (mustEmpty && day.length !== 0) continue; // 阶段二 b：只放空白日
+        if (mode === 0 && conflictsOf(code, day) > 0) continue;
+        if (mode <= 1 && day.length >= C) continue;
+        const cfl = conflictsOf(code, day);
+        if (day.length < bestCount || (day.length === bestCount && cfl < bestConflict)) {
+          bestCount = day.length;
+          bestConflict = cfl;
           best = d;
         }
       }
-      if (best < 0) continue; // 当日全满 C（N 过小/缺口过多）→ 该次出现顺延下一轮
-      dayCodes[best].push(g.code);
+      if (best >= 0) return best;
     }
+    return -1;
+  };
+  // 阶段一 · 铺开：按 priority 降序各放第 1 次暴露 → 尽量各占不同天、跨日不重复。
+  for (const g of gaps) {
+    const d = pickDay(g.code, false, N === 1);
+    if (d >= 0) {
+      dayCodes[d].push(g.code);
+      inc(g.code);
+    }
+  }
+  // 阶段二 a · 强度双频：大缺口（deficit≥1.2 且 N≥2）补第 2 次，可与别的能力共日，仍受相斥/容量约束；
+  // 单日已满 C 且无其它可用位 → 本次顺延（不超载堆叠）。
+  for (const g of gaps) {
+    if (freqOf(g.deficit) < 2) continue;
+    const d = pickDay(g.code, false, false);
+    if (d >= 0) {
+      dayCodes[d].push(g.code);
+      inc(g.code);
+    }
+  }
+  // 阶段二 b · 富余填空：仍有空白训练日（占用天数 < N）→ 按需补放、只进空白日，
+  // 候选按 deficit 降序（并列 priority 降序），单能力每轮上限 ⌈N/A⌉（≤3），均摊扩散。
+  const fillCap = () => Math.max(1, Math.min(3, Math.ceil(N / A)));
+  const fillOrder = gaps.slice().sort((x, y) => y.deficit - x.deficit || y.priority - x.priority);
+  while (dayCodes.some((d) => d.length === 0)) {
+    const cand = fillOrder.find((g) => (occ[g.code] ?? 0) < fillCap());
+    if (!cand) break;
+    const d = pickDay(cand.code, true, false);
+    if (d < 0) break;
+    dayCodes[d].push(cand.code);
+    inc(cand.code);
   }
 
   // 每日目标能力列表（按该日能力全局优先级降序稳定呈现）
@@ -282,13 +334,13 @@ export function generatePlan(user: UserData): Plan {
     const ordered = codes.slice().sort((a, b) => (gapsMap[b]?.priority ?? 0) - (gapsMap[a]?.priority ?? 0));
     const targets: DayAbilityTarget[] = ordered.map((code) => {
       const g = gapsMap[code];
-      const f = g ? freqOf(g.deficit) : 1;
-      const dDay = g ? round1(g.deficit / f) : 0;
+      const k = occ[code] ?? 1; // v2.2：按本轮实际出现次数均摊缺口（§5.6）
+      const dDay = g ? round1(g.deficit / k) : 0;
       return {
         code,
         baseline: current[code],
         target: round1(Math.min(5, current[code] + dDay)),
-        freq: f,
+        freq: k,
       };
     });
     const theme = themeOf(ordered);
@@ -315,7 +367,7 @@ export function generatePlan(user: UserData): Plan {
   };
 
   return {
-    algorithm_version: "0.2.1-mock",
+    algorithm_version: "0.3.0-mock",
     generatedAt: new Date().toISOString(),
     sports: user.sports,
     current,
