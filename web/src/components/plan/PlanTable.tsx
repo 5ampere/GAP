@@ -126,7 +126,14 @@ export default function PlanTable({ plan, onReedit }: Props) {
       if (typeof document !== "undefined" && document.fonts?.ready) {
         await document.fonts.ready; // 等字体就绪再捕获，避免文字缺漏
       }
-      const dataUrl = await toPng(node, { pixelRatio: 2, backgroundColor: "#ffffff", cacheBust: false });
+      // 显式传宽高：clone 会被铺成固定 1080 宽的静态盒，避免负偏移/零尺寸导致全白图
+      const dataUrl = await toPng(node, {
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+        cacheBust: false,
+        width: node.offsetWidth,
+        height: node.offsetHeight,
+      });
       const a = document.createElement("a");
       a.download = `gap-plan-${ymd(plan.generatedAt)}.png`;
       a.href = dataUrl;
@@ -169,20 +176,23 @@ export default function PlanTable({ plan, onReedit }: Props) {
       <div className="pt-card-grid mt-4">{dayCards()}</div>
       {footBlock()}
 
-      {/* v2.3 图片下载：离屏渲染副本（白底固定配色，仅供 html-to-image 捕获，不参与界面交互） */}
-      <div className="pt-export" ref={exportRef} aria-hidden="true">
-        <div className="pt-export-head">
-          <span className="pt-export-brand">
-            GAP · {L("训练计划", "Training Plan")}
-          </span>
-          <span className="pt-export-meta tnum">
-            {lang === "en"
-              ? `${plan.days.length} training days · generated ${new Date(plan.generatedAt).toLocaleString()}`
-              : `共 ${plan.days.length} 个训练日 · 生成于 ${new Date(plan.generatedAt).toLocaleString()}`}
-          </span>
+      {/* v2.3 图片下载：离屏渲染副本（白底固定配色，仅供 html-to-image 捕获，不参与界面交互）。
+          离屏定位在 .pt-export-host，捕获节点 .pt-export 保持静态——避免克隆带负偏移导致全白图。 */}
+      <div className="pt-export-host" aria-hidden="true">
+        <div className="pt-export" ref={exportRef}>
+          <div className="pt-export-head">
+            <span className="pt-export-brand">
+              GAP · {L("训练计划", "Training Plan")}
+            </span>
+            <span className="pt-export-meta tnum">
+              {lang === "en"
+                ? `${plan.days.length} training days · generated ${new Date(plan.generatedAt).toLocaleString()}`
+                : `共 ${plan.days.length} 个训练日 · 生成于 ${new Date(plan.generatedAt).toLocaleString()}`}
+            </span>
+          </div>
+          <div className="pt-card-grid">{dayCards()}</div>
+          {footBlock()}
         </div>
-        <div className="pt-card-grid">{dayCards()}</div>
-        {footBlock()}
       </div>
     </div>
   );

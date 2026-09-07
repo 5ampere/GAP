@@ -285,17 +285,21 @@
 .pt-foot { margin-top: 4px; font-size: 11px; color: var(--text-tertiary); }
 
 /* ---- 总表导出副本（PlanTable · v2.3 图片下载）----
-   离屏固定 1080 宽渲染，白底固定配色（覆盖暗色令牌），语言随当前界面；
-   仅供 html-to-image 捕获为 PNG，不参与交互。 */
-.pt-export {
+   离屏定位在 .pt-export-host；捕获节点 .pt-export 保持静态（克隆若带负偏移会把内容甩出
+   画布导致全白图）。白底固定配色（覆盖暗色令牌），语言随当前界面；仅供 html-to-image 捕获。 */
+.pt-export-host {
   position: fixed; top: 0; left: -9999px;
+  width: 1080px;
+  pointer-events: none;
+}
+.pt-export {
   box-sizing: border-box;
   width: 1080px; max-width: none;
   padding: 28px 28px 24px;
   font-family: var(--font-sans); line-height: 1.5;
   color-scheme: light;
   background: #ffffff; color: #1d1d1f;
-  pointer-events: none; user-select: none;
+  user-select: none;
   /* 强制浅色调色板（不受站点 [data-theme="dark"] 影响） */
   --bg-page: #ffffff;
   --bg-elevated: #f5f5f7;
