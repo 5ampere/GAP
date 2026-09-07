@@ -223,26 +223,104 @@
 }
 .chosen-remove:hover { background: var(--fill); color: var(--danger); }
 
-/* ---- 总表（PlanTable） ---- */
-.table-scroll { overflow-x: auto; }
-.plan-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
-.plan-table th {
-  text-align: left; font-size: 12px; color: var(--text-tertiary); font-weight: 600;
-  padding: 8px 12px; border-bottom: 1px solid var(--separator);
+/* ---- 总表（PlanTable · v2.3 卡片化，见 §7.3）----
+   每日卡片横向铺排；卡片内纵向两段：上段目标能力，下段动作平铺。 */
+.pt-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+  align-items: stretch;
 }
-.plan-table td { padding: 12px; vertical-align: top; border-bottom: 1px solid var(--separator); }
-.plan-table tbody tr:last-child td { border-bottom: none; }
-.pt-day { white-space: nowrap; font-weight: 600; }
-.pt-theme { min-width: 140px; }
-.pt-targets { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+.pt-card {
+  display: flex; flex-direction: column; min-width: 0;
+  background: var(--bg-page);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.pt-card-head {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 12px 16px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--separator);
+}
+.pt-card-line { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pt-day { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+.pt-est { font-size: 12px; color: var(--text-tertiary); white-space: nowrap; }
+.pt-theme { font-size: 13px; color: var(--text-secondary); line-height: 1.35; }
+
+/* 上段：能力 */
+.pt-sec {
+  display: block; margin-bottom: 6px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-tertiary);
+}
+.pt-card-targets { padding: 12px 16px 6px; }
+.pt-targets { display: flex; flex-direction: column; gap: 5px; }
 .pt-target { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.pt-items { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
-.pt-item { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.pt-cat { font-size: 11px; }
-.pt-dose { font-size: 12px; color: var(--text-tertiary); }
-.pt-est { white-space: nowrap; color: var(--text-secondary); }
-.pt-practice { padding: 14px 12px; font-size: 12px; color: var(--text-secondary); background: var(--bg-elevated-2); }
-.pt-foot { padding: 8px 12px; font-size: 11px; color: var(--text-tertiary); }
+.pt-target-name { font-size: 13px; font-weight: 500; }
+
+/* 下段：动作平铺（两行：名称+徽标 / 剂量） */
+.pt-card-items {
+  flex: 1;
+  display: flex; flex-direction: column;
+  padding: 10px 16px 14px;
+  border-top: 1px dashed var(--separator);
+}
+.pt-items { display: flex; flex-direction: column; flex: 1; }
+.pt-item { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; }
+.pt-item + .pt-item { border-top: 1px dashed var(--separator); }
+.pt-item-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.pt-item-name { font-size: 13px; font-weight: 600; }
+.pt-cat { font-size: 11px; flex: 0 0 auto; }
+.pt-item-dose { font-size: 12px; color: var(--text-secondary); }
+
+/* 全局尾行：practice + 算法版本 */
+.pt-foot-block {
+  margin-top: var(--space-5);
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+}
+.pt-practice { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.pt-foot { margin-top: 4px; font-size: 11px; color: var(--text-tertiary); }
+
+/* ---- 总表导出副本（PlanTable · v2.3 图片下载）----
+   离屏固定 1080 宽渲染，白底固定配色（覆盖暗色令牌），语言随当前界面；
+   仅供 html-to-image 捕获为 PNG，不参与交互。 */
+.pt-export {
+  position: fixed; top: 0; left: -9999px;
+  box-sizing: border-box;
+  width: 1080px; max-width: none;
+  padding: 28px 28px 24px;
+  font-family: var(--font-sans); line-height: 1.5;
+  color-scheme: light;
+  background: #ffffff; color: #1d1d1f;
+  pointer-events: none; user-select: none;
+  /* 强制浅色调色板（不受站点 [data-theme="dark"] 影响） */
+  --bg-page: #ffffff;
+  --bg-elevated: #f5f5f7;
+  --bg-elevated-2: #ebebed;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #86868b;
+  --separator: rgba(0, 0, 0, 0.12);
+  --fill: rgba(120, 120, 128, 0.12);
+  --accent: #0071e3;
+  --accent-faint: rgba(0, 113, 227, 0.10);
+  --success: #34c759;
+  --warning: #ff9500;
+  --danger: #ff3b30;
+  --info: #0a84ff;
+}
+.pt-export .pt-card { background: var(--bg-page); }
+.pt-export-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  margin-bottom: 18px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--separator);
+}
+.pt-export-brand { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; color: #1d1d1f; }
+.pt-export-meta { font-size: 12px; color: var(--text-tertiary); }
 
 /* ---- 专项实践提醒（v1.17 弱化为底部单行小字提示，非卡片） ---- */
 .practice-note {
