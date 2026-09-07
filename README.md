@@ -4,7 +4,7 @@
 
 GAP 帮助「不只玩一项运动」的你，找出身体通用能力的短板，并生成围绕这些短板的训练计划。网站默认中文，可一键切换英文。
 
-- 在线预览：<https://gap-scgt.vercel.app/>
+- 在线预览：EdgeOne Pages 部署后提供 `*.edgeone.app` 地址（见下方「部署」）
 - 仓库：<https://github.com/5ampere/GAP>
 - 技术栈：Next.js 16（App Router）+ React 19 + TypeScript
 - 数据与逻辑：纯前端实现 —— 无后端、无数据库；用户数据保存在浏览器 `localStorage`，训练计划由本地 mock 引擎即时生成。
@@ -24,7 +24,7 @@ GAP 帮助「不只玩一项运动」的你，找出身体通用能力的短板�
 
 ```
 GAP/
-├─ web/                    # Next.js 网站（唯一可运行代码，Vercel 部署根目录）
+├─ web/                    # Next.js 网站（唯一可运行代码，纯静态导出 out/，EdgeOne Pages 部署根目录）
 ├─ HighLevelDesign/        # 系统设计文档（HLD）
 ├─ LowLevelDesign/         # 网站详细设计文档（LLD）——改需求先改这里
 ├─ DevelopResource/        # 设计素材
@@ -59,14 +59,16 @@ npm run dev
 | 命令 | 作用 |
 |------|------|
 | `npm run dev` | 本地开发，热更新（http://localhost:3000） |
-| `npm run build` | 生产构建（含 TypeScript 类型检查；提交前需通过） |
-| `npm start` | 本地预览生产构建结果（需先 build） |
+| `npm run build` | 生产构建（含 TypeScript 类型检查）：纯静态导出到 `web/out/`；提交前需通过 |
+| `npm run start` | 本地预览静态产物（`npx serve out`，需先 build） |
 
-## 部署
+## 部署（EdgeOne Pages）
 
-- 方式：GitHub + Vercel，**单仓库自动部署** —— 推送 `main` 分支即触发。
-- Vercel 项目 Root Directory 已设为 `web`。
-- 上线流程：本地确认 → `npm run build` 通过 → 提交并 `git push origin main` → 稍等约 1–2 分钟刷新线上地址查看。
+GAP 为纯客户端静态站，构建产出**纯静态 `out/`**（`next.config.ts` 已设 `output: "export"` + `trailingSlash: true`，每路由 `<dir>/index.html`，深链可直接访问）。部署走 **EdgeOne Pages**（腾讯云，免费、默认域名免备案）：
+
+- 上线流程：本地确认 → `npm run build` 通过 → 提交并 `git push origin main` → EdgeOne 自动拉取构建。
+- EdgeOne 项目构建参数：**根目录（Root Directory）`web`** · **构建命令（Build Command）`npm run build`** · **输出目录（Output Directory）`out`**（其余默认；用「导入 GitHub 仓库」方式，别用 Next.js 框架预设）。
+- 部署后访问地址：`https://<项目名>.edgeone.app`。
 
 ## 相关文档
 
